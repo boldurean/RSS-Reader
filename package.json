@@ -1,28 +1,42 @@
 {
   "name": "@hexlet/code",
-  "version": "1.0.0",
-  "description": "[![Actions Status](https://github.com/boldurean/frontend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/boldurean/frontend-project-lvl3/actions)",
-  "main": "index.js",
-  "type": "module",
+  "version": "0.1.0",
+  "description": "",
   "scripts": {
-    "test": "npx jest"
+    "test": "jest --colors"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com//boldurean/frontend-project-lvl3.git"
+    "url": "git+https://github.com//boldurean/frontend-project-lvl3.git"
   },
-  "author": "V. Boldurean",
+  "author": "Vasilii Boldurean",
   "license": "ISC",
-  "devDependencies": {
-    "@jest/globals": "^26.6.2",
-    "eslint": "^7.24.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jest": "^24.3.5",
-    "jest": "^26.6.3",
-    "jest-cli": "^26.6.3"
+  "bugs": {
+    "url": "https://github.com//boldurean/frontend-project-lvl3.git/issues"
   },
-  "dependencies": {
-    "lodash-es": "^4.17.21"
+  "homepage": "https://github.com//boldurean/frontend-project-lvl3#readme",
+  "jest": {
+    "verbose": true,
+    "testURL": "http://localhost/"
+  },
+  "main": "src/init.js",
+  "devDependencies": {
+    "@babel/core": "^7.13.14",
+    "@babel/preset-env": "^7.13.12",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^26.6.3",
+    "babel-loader": "^8.2.2",
+    "debug": "^4.3.1",
+    "eslint": "^7.23.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-babel": "^5.3.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.4",
+    "html-webpack-plugin": "^5.3.1",
+    "jest": "^26.6.3",
+    "jest-cli": "^26.6.3",
+    "webpack": "^5.31.0",
+    "webpack-cli": "^4.6.0",
+    "webpack-dev-server": "^3.11.2"
   }
 }

@@ -8,6 +8,7 @@ plugins:
 env:
   node: true
   es2020: true
+  browser: true
 
 extends:
   - 'airbnb-base'
