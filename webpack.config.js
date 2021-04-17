@@ -24,7 +24,11 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
+<<<<<<< HEAD
       }
+=======
+      },
+>>>>>>> 7fdf7c0 (update comma)
     ],
   },
   plugins: [
