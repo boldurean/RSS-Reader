@@ -9,9 +9,6 @@ module.exports = {
     filename: 'main.js',
   },
   watch: true,
-  watchOptions: {
-    ignored: '/node_modules',
-  },
   module: {
     rules: [
       {
