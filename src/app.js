@@ -1,3 +1,1 @@
-export default () => {
-  return 'Boom!';
-};
+export default () => 'Boom!';
