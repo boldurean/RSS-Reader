@@ -4,19 +4,34 @@ root: true
 
 plugins:
   - jest
-  - babel
+  - functional
+  - testing-library
+  - jest-dom
 
 env:
-  node: true
   jest: true
   browser: true
-
-parser: babel-eslint
+  es2020: true
 
 extends:
   - 'airbnb-base'
   - 'plugin:jest/recommended'
+  - 'plugin:functional/external-recommended'
+  - 'plugin:functional/recommended'
+  - "plugin:jest-dom/recommended"
+  - 'plugin:testing-library/dom'
+
+parserOptions:
+  ecmaVersion: 2020
 
 rules:
-  no-console: 0
   import/extensions: 0
+  import/no-unresolved: 0
+  functional/no-conditional-statement: 0
+  functional/no-expression-statement: 0
+  functional/immutable-data: 0
+  functional/functional-parameters: 0
+  functional/no-try-statement: 0
+  functional/no-throw-statement: 0
+  no-param-reassign: 0
+
