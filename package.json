@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "test": "jest --colors",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -18,11 +19,6 @@
   "jest": {
     "verbose": true,
     "testURL": "http://localhost/"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
   },
   "main": "src/index.js",
   "devDependencies": {
@@ -47,8 +43,8 @@
     "husky": "^6.0.0",
     "jest": "^26.6.3",
     "jest-cli": "^26.6.3",
+    "lint-staged": "^10.5.4",
     "prettier": "2.2.1",
-    "pretty-quick": "^3.1.0",
     "style-loader": "^2.0.0",
     "webpack": "^5.31.0",
     "webpack-cli": "^4.6.0",
@@ -56,5 +52,9 @@
   },
   "dependencies": {
     "bootstrap": "^5.0.0-beta3"
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix",
+    "*.{js,css,md}": "prettier --write"
   }
 }

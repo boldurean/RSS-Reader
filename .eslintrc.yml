@@ -13,6 +13,7 @@ env:
   es2020: true
 
 extends:
+  - 'prettier'
   - 'airbnb-base'
   - 'plugin:jest/recommended'
   - 'plugin:functional/external-recommended'
