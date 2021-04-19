@@ -1,6 +1,6 @@
-/node_modules/
+node_modules/
 *.log
-.eslintcache
-.husky
-coverage
-/dist
+.eslintcache/
+.husky/
+coverage/
+dist

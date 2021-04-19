@@ -13,13 +13,13 @@ env:
   es2020: true
 
 extends:
-  - 'prettier'
   - 'airbnb-base'
   - 'plugin:jest/recommended'
   - 'plugin:functional/external-recommended'
   - 'plugin:functional/recommended'
   - 'plugin:jest-dom/recommended'
   - 'plugin:testing-library/dom'
+  - 'prettier'
 
 parserOptions:
   ecmaVersion: 2020

@@ -17,4 +17,7 @@ test-coverage:
 lint:
 	npx eslint .
 
+prettier:
+	prettier --check .
+
 .PHONY: test
