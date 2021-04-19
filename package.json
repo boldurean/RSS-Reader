@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "description": "",
   "scripts": {
-    "test": "jest --colors"
+    "test": "jest --colors",
+    "fix-code": "prettier --write .",
+    "lint-code": "eslint --fix ."
   },
   "repository": {
     "type": "git",
@@ -59,7 +61,8 @@
   },
   "lint-staged": {
     "*": [
-      "eslint --fix .", "prettier --check .", "prettier --write ."
+      "fix-code",
+      "lint-code"
     ]
   }
 }
