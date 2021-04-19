@@ -17,4 +17,10 @@ test-coverage:
 lint:
 	npx eslint .
 
+check-format:
+	prettier --check .
+
+code-format:
+	prettier --write .
+
 .PHONY: test
