@@ -4,3 +4,5 @@ import 'bootstrap';
 import runApp from './app.js';
 
 runApp();
+
+// фиксим проблему нерешаемую линтером
