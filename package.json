@@ -4,7 +4,6 @@
   "description": "",
   "scripts": {
     "test": "jest --colors",
-    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -22,7 +21,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "make check-format"
+      "pre-commit": "pretty-quick --staged"
     }
   },
   "main": "src/index.js",
@@ -49,6 +48,7 @@
     "jest": "^26.6.3",
     "jest-cli": "^26.6.3",
     "prettier": "2.2.1",
+    "pretty-quick": "^3.1.0",
     "style-loader": "^2.0.0",
     "webpack": "^5.31.0",
     "webpack-cli": "^4.6.0",
