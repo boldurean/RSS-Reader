@@ -1,5 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+eslint --fix .
 npx eslint .
 pretty-quick --staged
