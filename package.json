@@ -4,8 +4,9 @@
   "description": "",
   "scripts": {
     "test": "jest --colors",
-    "fix-code": "prettier --write .",
-    "lint-code": "eslint --fix ."
+    "prettier": "prettier --write .",
+    "lint": "eslint --fix .",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -61,8 +62,8 @@
   },
   "lint-staged": {
     "*": [
-      "fix-code",
-      "lint-code"
+      "prettier",
+      "lint"
     ]
   }
 }
