@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "test": "jest --colors",
+    "watch": "webpack --watch",
     "prepare": "husky install"
   },
   "repository": {
@@ -57,6 +58,7 @@
     "@popperjs/core": "^2.9.2",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
+    "lodash-es": "^4.17.21",
     "on-change": "^2.2.3",
     "yup": "^0.32.9"
   }
