@@ -1,18 +1,76 @@
 // @ts-check
 import axios from 'axios';
-import _ from 'lodash-es';
+import _ from 'lodash';
+import onChange from 'on-change';
 import parse from './parser.js';
-import watchedState from './view.js';
+import validateField from './validate.js';
+import {
+  renderFeedback,
+  renderPosts,
+  renderFeeds,
+  processStateHandler,
+} from './view.js';
 
 export default () => {
-  const form = document.querySelector('.rss-form');
+  const state = {
+    form: {
+      processState: 'filling',
+      feedbackState: null,
+      url: '',
+      feeds: [],
+      posts: [],
+      loadedFeeds: [],
+      valid: true,
+      errors: {},
+    },
+  };
+
+  const elements = {
+    form: document.querySelector('.rss-form'),
+    submitButton: document.querySelector('button[type="submit"]'),
+    feedsContainer: document.querySelector('.feeds'),
+    postsContainer: document.querySelector('.posts'),
+    feedbackField: document.querySelector('div.feedback'),
+    urlField: document.querySelector('input[name="url"]'),
+  };
+
+  const watchedState = onChange(state, (path, value) => {
+    switch (path) {
+      case 'form.processState':
+        processStateHandler(value, elements);
+        break;
+      case 'form.url':
+        validateField(watchedState, elements);
+        break;
+      case 'form.feedbackState':
+        renderFeedback(value, elements);
+        break;
+      case 'form.feeds':
+        renderFeeds(watchedState, elements);
+        break;
+      case 'form.posts':
+        renderPosts(watchedState, elements);
+        break;
+      default:
+    }
+  });
+
+  const addProxy = (url) => {
+    const urlWithProxy = new URL(
+      '/get',
+      'https://hexlet-allorigins.herokuapp.com',
+    );
+    urlWithProxy.searchParams.set('url', url);
+    urlWithProxy.searchParams.set('disableCache', 'true');
+    return urlWithProxy.toString();
+  };
 
   const getRssData = (url) => {
     watchedState.form.processState = 'sending';
     watchedState.form.feedbackState = null;
-    const path = 'https://hexlet-allorigins.herokuapp.com/get?url=';
+    const urlWithProxy = addProxy(url);
     return axios
-      .get(`${path}${url}`)
+      .get(urlWithProxy)
       .then((response) => response.data.contents)
       .then((data) => parse(data))
       .catch((e) => {
@@ -21,14 +79,12 @@ export default () => {
         return e;
       });
   };
-
-  form.addEventListener('submit', (e) => {
+  elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(e.target);
     watchedState.form.url = '';
     watchedState.form.url = data.get('url');
     if (!watchedState.form.valid) return;
-
     getRssData(watchedState.form.url)
       .then((parsedData) => {
         const feedID = _.uniqueId();
@@ -59,7 +115,7 @@ export default () => {
         });
         watchedState.form.processState = 'finished';
         watchedState.form.feedbackState = 'success';
-        form.reset();
+        elements.form.reset();
       })
       .catch((error) => {
         watchedState.form.processState = 'failed';

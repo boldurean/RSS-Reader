@@ -4,7 +4,6 @@
   "description": "",
   "scripts": {
     "test": "jest --colors",
-    "watch": "webpack --watch",
     "prepare": "husky install"
   },
   "repository": {
@@ -21,7 +20,7 @@
     "verbose": true,
     "testURL": "http://localhost/"
   },
-  "main": "src/index.js",
+  "main": "src/init.js",
   "devDependencies": {
     "@babel/core": "^7.13.14",
     "@babel/preset-env": "^7.13.12",
@@ -61,7 +60,7 @@
     "@popperjs/core": "^2.9.2",
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
-    "lodash-es": "^4.17.21",
+    "lodash": "^4.17.21",
     "on-change": "^2.2.3",
     "yup": "^0.32.9"
   }

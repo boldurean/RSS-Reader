@@ -4,9 +4,6 @@ develop:
 install:
 	npm ci
 
-watch:
-	npm run watch
-
 build:
 	rm -rf dist
 	NODE_ENV=production npx webpack
@@ -20,7 +17,5 @@ test-coverage:
 lint:
 	npx eslint .
 
-prettier:
-	prettier --check .
 
 .PHONY: test

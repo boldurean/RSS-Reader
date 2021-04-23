@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Новые уроки на Хекслете</title>
+    <description>Практические уроки по программированию</description>
+    <link>https://ru.hexlet.io/</link>
+    <webMaster>info@hexlet.io</webMaster>
+    <item>
+      <title>Миксины / HTML: Препроцессор Pug</title>
+      <guid isPermaLink="false">1908</guid>
+      <link>https://ru.hexlet.io/courses/html-pug/lessons/mixin/theory_unit</link>
+      <description>Цель: Научиться создавать миксины для переиспользования вёрстки внутри Pug. Узнать о передаче аргументов и конструкции block</description>
+      <pubDate>Thu, 22 Apr 2021 17:08:12 +0000</pubDate>
+    </item>
+    <item>
+      <title>Циклы / HTML: Препроцессор Pug</title>
+      <guid isPermaLink="false">1907</guid>
+      <link>https://ru.hexlet.io/courses/html-pug/lessons/iteration/theory_unit</link>
+      <description>Цель: Научиться перебирать массивы и объекты с использованием циклов Pug. Изучить конструкцию each else</description>
+      <pubDate>Wed, 14 Apr 2021 12:01:04 +0000</pubDate>
+    </item>
+    <item>
+      <title>Условные конструкции / HTML: Препроцессор Pug</title>
+      <guid isPermaLink="false">1906</guid>
+      <link>https://ru.hexlet.io/courses/html-pug/lessons/conditionals/theory_unit</link>
+      <description>Цель: Изучить условные конструкции препроцесса Pug. Научиться использоваться конструкции if, else, unless</description>
+      <pubDate>Mon, 12 Apr 2021 08:45:24 +0000</pubDate>
+    </item>
+    <item>
+      <title>JavaScript / HTML: Препроцессор Pug</title>
+      <guid isPermaLink="false">1905</guid>
+      <link>https://ru.hexlet.io/courses/html-pug/lessons/javascript/theory_unit</link>
+      <description>Цель: Научиться использовать JavaScript внутри препроцессора и использовать интерполяцию переменных и выражений. Изучить добавление буферизованного и небуферизованного кода.</description>
+      <pubDate>Sat, 03 Apr 2021 15:42:56 +0000</pubDate>
+    </item>
+    <item>
+      <title>Подключение файлов / HTML: Препроцессор Pug</title>
+      <guid isPermaLink="false">1903</guid>
+      <link>https://ru.hexlet.io/courses/html-pug/lessons/include/theory_unit</link>
+      <description>Цель: Изучить подключение Pug файлов и работу с дополнительными модулями, позволяющие обрабатывать данные в разных форматах</description>
+      <pubDate>Sun, 14 Mar 2021 14:26:06 +0000</pubDate>
+    </item>
+    <item>
+      <title>Теги и контент / HTML: Препроцессор Pug</title>
+      <guid isPermaLink="false">1904</guid>
+      <link>https://ru.hexlet.io/courses/html-pug/lessons/html/theory_unit</link>
+      <description>Цель: Научиться добавлять теги, атрибуты и контент с помощью Pug</description>
+      <pubDate>Sun, 14 Mar 2021 14:26:02 +0000</pubDate>
+    </item>
+    <item>
+      <title>Установка / HTML: Препроцессор Pug</title>
+      <guid isPermaLink="false">1901</guid>
+      <link>https://ru.hexlet.io/courses/html-pug/lessons/install/theory_unit</link>
+      <description>Цель: Установить препроцессор Pug и скомпилировать первый файл</description>
+      <pubDate>Sun, 14 Mar 2021 14:25:58 +0000</pubDate>
+    </item>
+    <item>
+      <title>Введение / HTML: Препроцессор Pug</title>
+      <guid isPermaLink="false">1902</guid>
+      <link>https://ru.hexlet.io/courses/html-pug/lessons/intro/theory_unit</link>
+      <description>Цель: Узнать о целях и структуре курса</description>
+      <pubDate>Sun, 14 Mar 2021 14:25:52 +0000</pubDate>
+    </item>
+    <item>
+      <title>Рациональные числа / Ruby: Составные данные</title>
+      <guid isPermaLink="false">1895</guid>
+      <link>https://ru.hexlet.io/courses/ruby-compound-data/lessons/rational/theory_unit</link>
+      <description>Цель: Рассмотреть рациональные числа как новый пример абстракции на основе пар чисел.</description>
+      <pubDate>Mon, 01 Mar 2021 21:13:48 +0000</pubDate>
+    </item>
+    <item>
+      <title>Реализация пар / Ruby: Составные данные</title>
+      <guid isPermaLink="false">1897</guid>
+      <link>https://ru.hexlet.io/courses/ruby-compound-data/lessons/pair_implementation/theory_unit</link>
+      <description>Цель: Написать собственную реализацию пар на языке Ruby.</description>
+      <pubDate>Mon, 01 Mar 2021 21:13:40 +0000</pubDate>
+    </item>
+  </channel>
+</rss>
