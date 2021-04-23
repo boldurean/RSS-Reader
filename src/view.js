@@ -1,28 +1,29 @@
 const renderFeedback = (value, elements) => {
-  elements.feedbackField.classList.remove('text-danger', 'text-success');
-  elements.urlField.classList.remove('is-invalid');
-  elements.feedbackField.innerHTML = '';
+  const { feedbackField, urlField } = elements;
+  feedbackField.classList.remove('text-danger', 'text-success');
+  urlField.classList.remove('is-invalid');
+  feedbackField.innerHTML = '';
 
   switch (value) {
     case null:
       return;
     case 'existing':
-      elements.feedbackField.classList.add('text-danger');
-      elements.feedbackField.textContent = 'RSS уже существует';
-      elements.urlField.classList.add('is-invalid');
+      feedbackField.classList.add('text-danger');
+      feedbackField.textContent = 'RSS уже существует';
+      urlField.classList.add('is-invalid');
       break;
     case 'invalid':
-      elements.feedbackField.classList.add('text-danger');
-      elements.urlField.classList.add('is-invalid');
-      elements.feedbackField.textContent = 'Ссылка должна быть валидным URL';
+      feedbackField.classList.add('text-danger');
+      urlField.classList.add('is-invalid');
+      feedbackField.textContent = 'Ссылка должна быть валидным URL';
       break;
     case 'isnotrss':
-      elements.feedbackField.classList.add('text-danger');
-      elements.feedbackField.textContent = 'Ресурс не содержит валидный RSS';
+      feedbackField.classList.add('text-danger');
+      feedbackField.textContent = 'Ресурс не содержит валидный RSS';
       break;
     case 'success':
-      elements.feedbackField.textContent = 'RSS успешно загружен';
-      elements.feedbackField.classList.add('text-success');
+      feedbackField.textContent = 'RSS успешно загружен';
+      feedbackField.classList.add('text-success');
       break;
     default:
       throw new Error(`Unknown case ${value}`);
@@ -30,8 +31,9 @@ const renderFeedback = (value, elements) => {
 };
 
 const renderFeeds = (watchedState, elements) => {
+  const { feedsContainer } = elements;
   if (!watchedState.form.feeds) return;
-  elements.feedsContainer.innerHTML = '';
+  feedsContainer.innerHTML = '';
   const feedsHeader = document.createElement('h2');
   feedsHeader.textContent = 'Фиды';
   const feedsGroup = document.createElement('ul');
@@ -49,14 +51,15 @@ const renderFeeds = (watchedState, elements) => {
     newFeedElement.appendChild(p);
     feedsGroup.appendChild(newFeedElement);
   });
-  elements.feedsContainer.appendChild(feedsHeader);
-  elements.feedsContainer.appendChild(feedsGroup);
+  feedsContainer.appendChild(feedsHeader);
+  feedsContainer.appendChild(feedsGroup);
   watchedState.form.processState = 'finished';
 };
 
 const renderPosts = (watchedState, elements) => {
+  const { postsContainer } = elements;
   if (!watchedState.form.posts) return;
-  elements.postsContainer.innerHTML = '';
+  postsContainer.innerHTML = '';
   const postsHeader = document.createElement('h2');
   postsHeader.textContent = 'Посты';
   const postsGroup = document.createElement('ul');
@@ -75,24 +78,25 @@ const renderPosts = (watchedState, elements) => {
     newPost.appendChild(a);
     postsGroup.appendChild(newPost);
   });
-  elements.postsContainer.appendChild(postsHeader);
-  elements.postsContainer.appendChild(postsGroup);
+  postsContainer.appendChild(postsHeader);
+  postsContainer.appendChild(postsGroup);
   watchedState.form.processState = 'finished';
 };
 
 const processStateHandler = (processState, elements) => {
+  const { submitButton } = elements;
   switch (processState) {
     case 'filling':
-      elements.submitButton.disabled = false;
+      submitButton.disabled = false;
       break;
     case 'sending':
-      elements.submitButton.disabled = true;
+      submitButton.disabled = true;
       break;
     case 'finished':
-      elements.submitButton.disabled = false;
+      submitButton.disabled = false;
       break;
     case 'failed':
-      elements.submitButton.disabled = false;
+      submitButton.disabled = false;
       break;
     default:
       throw new Error(`Unknown state: ${processState}`);
