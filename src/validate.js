@@ -1,29 +1,32 @@
 import * as yup from 'yup';
 
-const isLoaded = (coll, url) => {
-  const existing = coll.filter((feed) => url === feed.url);
-  return existing.length !== 0;
-};
+export default (watchedState, i18instance) => {
+  yup.setLocale({
+    string: {
+      url: i18instance.t('errors.validation.invalid'),
+    },
+  });
 
-const schema = yup.object().shape({
-  url: yup.string().url(),
-});
+  const loadedUrls = watchedState.form.feeds.map((feed) => feed.url);
+  const schema = yup.object().shape({
+    url: yup
+      .string()
+      .url()
+      .notOneOf(loadedUrls, i18instance.t('errors.validation.existing')),
+  });
 
-export default (state) => {
-  const { url } = state.form;
+  const { url } = watchedState.form;
+
   try {
     schema.validateSync({ url });
-    if (isLoaded(state.form.feeds, url)) {
-      state.form.feedbackState = 'existing';
-      state.form.valid = false;
-      return false;
-    }
-    state.form.loadedFeeds.push(url);
-    state.form.valid = true;
+    watchedState.form.valid = true;
+    watchedState.form.feedbackStatus = 'text-success';
+    watchedState.form.errors = null;
     return true;
   } catch (e) {
-    state.form.feedbackState = 'invalid';
-    state.form.valid = false;
-    return false;
+    watchedState.form.valid = false;
+    watchedState.form.feedbackStatus = 'text-danger';
+    watchedState.form.errors = e.message;
+    return e;
   }
 };

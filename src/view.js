@@ -1,41 +1,26 @@
-const renderFeedback = (value, elements) => {
-  const { feedbackField, urlField } = elements;
-  feedbackField.classList.remove('text-danger', 'text-success');
-  urlField.classList.remove('is-invalid');
-  feedbackField.innerHTML = '';
-
+const renderFeedback = (value, watchedState, elements, i18instance) => {
+  const { feedback } = elements;
+  feedback.classList.remove('text-danger', 'text-success');
+  feedback.innerHTML = '';
   switch (value) {
     case null:
       return;
-    case 'existing':
-      feedbackField.classList.add('text-danger');
-      feedbackField.textContent = 'RSS уже существует';
-      urlField.classList.add('is-invalid');
-      break;
-    case 'invalid':
-      feedbackField.classList.add('text-danger');
-      urlField.classList.add('is-invalid');
-      feedbackField.textContent = 'Ссылка должна быть валидным URL';
-      break;
-    case 'isnotrss':
-      feedbackField.classList.add('text-danger');
-      feedbackField.textContent = 'Ресурс не содержит валидный RSS';
-      break;
-    case 'success':
-      feedbackField.textContent = 'RSS успешно загружен';
-      feedbackField.classList.add('text-success');
+    case '':
+      feedback.classList.add(watchedState.form.feedbackStatus);
+      feedback.innerHTML = i18instance.t('feedback.success');
       break;
     default:
-      throw new Error(`Unknown case ${value}`);
+      feedback.classList.add(watchedState.form.feedbackStatus);
+      feedback.innerHTML = value;
   }
 };
 
-const renderFeeds = (watchedState, elements) => {
-  const { feedsContainer } = elements;
+const renderFeeds = (watchedState, elements, i18instance) => {
   if (!watchedState.form.feeds) return;
+  const { feedsContainer } = elements;
   feedsContainer.innerHTML = '';
   const feedsHeader = document.createElement('h2');
-  feedsHeader.textContent = 'Фиды';
+  feedsHeader.textContent = i18instance.t('feeds');
   const feedsGroup = document.createElement('ul');
   feedsGroup.classList.add('list-group', 'mb-5');
 
@@ -56,12 +41,12 @@ const renderFeeds = (watchedState, elements) => {
   watchedState.form.processState = 'finished';
 };
 
-const renderPosts = (watchedState, elements) => {
+const renderPosts = (watchedState, elements, i18instance) => {
   const { postsContainer } = elements;
   if (!watchedState.form.posts) return;
   postsContainer.innerHTML = '';
   const postsHeader = document.createElement('h2');
-  postsHeader.textContent = 'Посты';
+  postsHeader.textContent = i18instance.t('posts');
   const postsGroup = document.createElement('ul');
   postsGroup.classList.add('list-group', 'mb-5');
   watchedState.form.posts.forEach(({ title, link }) => {
@@ -103,4 +88,24 @@ const processStateHandler = (processState, elements) => {
   }
 };
 
-export { renderFeedback, renderFeeds, renderPosts, processStateHandler };
+const updateFieldState = (value, elements) => {
+  const { urlField } = elements;
+  switch (value) {
+    case false:
+      urlField.classList.add('is-invalid');
+      break;
+    case true:
+      urlField.classList.remove('is-invalid');
+      break;
+    default:
+      throw new Error(`Unknown case ${value}`);
+  }
+};
+
+export {
+  renderFeedback,
+  renderFeeds,
+  renderPosts,
+  processStateHandler,
+  updateFieldState,
+};

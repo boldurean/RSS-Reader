@@ -2,26 +2,38 @@
 import axios from 'axios';
 import _ from 'lodash';
 import onChange from 'on-change';
+import i18next from 'i18next';
+import resources from './locales/resources.js';
 import parse from './parser.js';
-import validateField from './validate.js';
+import validate from './validate.js';
 import {
   renderFeedback,
   renderPosts,
   renderFeeds,
   processStateHandler,
+  updateFieldState,
 } from './view.js';
 
 export default () => {
+  const defaultLanguage = 'ru';
+  const i18instance = i18next.createInstance();
+
+  i18instance.init({
+    lng: defaultLanguage,
+    resources,
+  });
+
   const state = {
+    lng: defaultLanguage,
     form: {
       processState: 'filling',
-      feedbackState: null,
+      feedbackMsg: null,
+      feedbackStatus: null,
       url: '',
       feeds: [],
       posts: [],
-      loadedFeeds: [],
       valid: true,
-      errors: {},
+      errors: null,
     },
   };
 
@@ -30,7 +42,7 @@ export default () => {
     submitButton: document.querySelector('button[type="submit"]'),
     feedsContainer: document.querySelector('.feeds'),
     postsContainer: document.querySelector('.posts'),
-    feedbackField: document.querySelector('div.feedback'),
+    feedback: document.querySelector('div.feedback'),
     urlField: document.querySelector('input[name="url"]'),
   };
 
@@ -39,17 +51,20 @@ export default () => {
       case 'form.processState':
         processStateHandler(value, elements);
         break;
-      case 'form.url':
-        validateField(watchedState, elements);
+      case 'form.valid':
+        updateFieldState(value, elements);
         break;
-      case 'form.feedbackState':
-        renderFeedback(value, elements);
+      case 'form.url':
+        validate(watchedState, i18instance);
+        break;
+      case 'form.errors':
+        renderFeedback(value, watchedState, elements, i18instance);
         break;
       case 'form.feeds':
-        renderFeeds(watchedState, elements);
+        renderFeeds(watchedState, elements, i18instance);
         break;
       case 'form.posts':
-        renderPosts(watchedState, elements);
+        renderPosts(watchedState, elements, i18instance);
         break;
       default:
     }
@@ -67,16 +82,18 @@ export default () => {
 
   const getRssData = (url) => {
     watchedState.form.processState = 'sending';
-    watchedState.form.feedbackState = null;
     const urlWithProxy = addProxy(url);
     return axios
       .get(urlWithProxy)
       .then((response) => response.data.contents)
       .then((data) => parse(data))
-      .catch((e) => {
+      .catch((error) => {
         watchedState.form.processState = 'failed';
-        watchedState.form.feedbackState = 'isnotrss';
-        return e;
+        watchedState.form.feedbackStatus = 'text-danger';
+        watchedState.form.feedbackMsg = i18instance.t(
+          'feedback.errors.network',
+        );
+        return error.message;
       });
   };
   elements.form.addEventListener('submit', (e) => {
@@ -114,12 +131,14 @@ export default () => {
           watchedState.form.posts.unshift(newPost);
         });
         watchedState.form.processState = 'finished';
-        watchedState.form.feedbackState = 'success';
+        watchedState.form.feedbackStatus = 'text-success';
+        watchedState.form.errors = '';
         elements.form.reset();
       })
       .catch((error) => {
         watchedState.form.processState = 'failed';
-        watchedState.form.feedbackState = 'isnotrss';
+        watchedState.form.feedbackStatus = 'text-danger';
+        watchedState.form.errors = i18instance.t('errors.parse.isnotrss');
         return error;
       });
   });
