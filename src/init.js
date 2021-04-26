@@ -1,10 +1,9 @@
 // @ts-check
-import axios from 'axios';
-import _ from 'lodash';
 import onChange from 'on-change';
 import i18next from 'i18next';
+import initAutoupdate from './autoupdate.js';
 import resources from './locales/resources.js';
-import parse from './parser.js';
+import { getRssData, extractFeed, extractPosts } from './utils.js';
 import validate from './validate.js';
 import {
   renderFeedback,
@@ -70,66 +69,23 @@ export default () => {
     }
   });
 
-  const addProxy = (url) => {
-    const urlWithProxy = new URL(
-      '/get',
-      'https://hexlet-allorigins.herokuapp.com',
-    );
-    urlWithProxy.searchParams.set('url', url);
-    urlWithProxy.searchParams.set('disableCache', 'true');
-    return urlWithProxy.toString();
-  };
-
-  const getRssData = (url) => {
-    watchedState.form.processState = 'sending';
-    const urlWithProxy = addProxy(url);
-    return axios
-      .get(urlWithProxy)
-      .then((response) => response.data.contents)
-      .then((data) => parse(data))
-      .catch((error) => {
-        watchedState.form.processState = 'failed';
-        watchedState.form.feedbackStatus = 'text-danger';
-        watchedState.form.feedbackMsg = i18instance.t(
-          'feedback.errors.network',
-        );
-        return error.message;
-      });
-  };
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = new FormData(e.target);
+    const url = data.get('url');
     watchedState.form.url = '';
-    watchedState.form.url = data.get('url');
+    watchedState.form.url = url;
     if (!watchedState.form.valid) return;
-    getRssData(watchedState.form.url)
+    getRssData(url, watchedState, i18instance)
       .then((parsedData) => {
-        const feedID = _.uniqueId();
-        const feedURL = watchedState.form.url;
-        const feedTitle = parsedData.querySelector('title').textContent;
-        const feedDescription = parsedData.querySelector('description')
-          .textContent;
-        const newFeed = {
-          id: feedID,
-          url: feedURL,
-          title: feedTitle,
-          description: feedDescription,
-        };
-        watchedState.form.feeds.unshift(newFeed);
-        const posts = parsedData.querySelectorAll('item');
-        posts.forEach((post) => {
-          const postTitle = post.querySelector('title').textContent;
-          const postLink = post.querySelector('link').textContent;
-          const postDescription = post.querySelector('description').textContent;
-          const newPost = {
-            fromFeed: feedID,
-            id: _.uniqueId(),
-            title: postTitle,
-            link: postLink,
-            description: postDescription,
-          };
-          watchedState.form.posts.unshift(newPost);
-        });
+        const oldFeeds = watchedState.form.feeds;
+        const newFeed = extractFeed(parsedData, watchedState);
+        watchedState.form.feeds = [...newFeed, ...oldFeeds];
+
+        const oldPosts = watchedState.form.posts;
+        const newPosts = extractPosts(parsedData);
+        watchedState.form.posts = [...newPosts, ...oldPosts];
+
         watchedState.form.processState = 'finished';
         watchedState.form.feedbackStatus = 'text-success';
         watchedState.form.errors = '';
@@ -142,4 +98,5 @@ export default () => {
         return error;
       });
   });
+  initAutoupdate(watchedState);
 };
