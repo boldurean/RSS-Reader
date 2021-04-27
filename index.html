@@ -7,6 +7,23 @@
     <title>RSS</title>
   </head>
   <body>
+  <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="modal" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <a class="btn btn-primary full-article" href="#" role="button" target="_blank" rel="noopener noreferrer">Читать полностью</a>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
     <main class="flex-grow-1">
       <section class="container-fluid bg-dark p-5">
         <div class="row"><div class="col-md-10 col-lg-8 mx-auto text-white">

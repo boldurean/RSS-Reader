@@ -15,5 +15,8 @@ export default {
     },
     feeds: 'Фиды',
     posts: 'Посты',
+    buttons: {
+      openModal: 'Просмотр',
+    },
   },
 };

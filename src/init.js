@@ -11,6 +11,8 @@ import {
   renderFeeds,
   processStateHandler,
   updateFieldState,
+  toggleModal,
+  markVisited,
 } from './view.js';
 
 export default () => {
@@ -34,6 +36,12 @@ export default () => {
       valid: true,
       errors: null,
     },
+    modal: {
+      title: null,
+      body: null,
+      link: null,
+    },
+    visitedLinkID: null,
   };
 
   const elements = {
@@ -43,6 +51,7 @@ export default () => {
     postsContainer: document.querySelector('.posts'),
     feedback: document.querySelector('div.feedback'),
     urlField: document.querySelector('input[name="url"]'),
+    modal: document.querySelector('.modal'),
   };
 
   const watchedState = onChange(state, (path, value) => {
@@ -64,6 +73,12 @@ export default () => {
         break;
       case 'form.posts':
         renderPosts(watchedState, elements, i18instance);
+        break;
+      case 'modal.link':
+        toggleModal(watchedState, elements);
+        break;
+      case 'linkVisitedID':
+        markVisited(value, watchedState);
         break;
       default:
     }

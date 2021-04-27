@@ -49,20 +49,42 @@ const renderPosts = (watchedState, elements, i18instance) => {
   postsHeader.textContent = i18instance.t('posts');
   const postsGroup = document.createElement('ul');
   postsGroup.classList.add('list-group', 'mb-5');
-  watchedState.form.posts.forEach(({ title, link }) => {
-    const newPost = document.createElement('li');
-    newPost.classList.add(
-      'list-group-item',
-      'd-flex',
-      'justify-content-between',
-      'align-items-start',
-    );
-    const a = document.createElement('a');
-    a.setAttribute('href', link);
-    a.textContent = title;
-    newPost.appendChild(a);
-    postsGroup.appendChild(newPost);
-  });
+  watchedState.form.posts.forEach(
+    ({ title, description, link, id, visited }) => {
+      const newPost = document.createElement('li');
+      const visitedClass = visited ? 'font-weight-normal' : 'font-weight-bold';
+      newPost.classList.add(
+        'list-group-item',
+        'd-flex',
+        'justify-content-between',
+        'align-items-start',
+        visitedClass,
+      );
+      const a = document.createElement('a');
+      a.setAttribute('href', link);
+      a.setAttribute('target', '_blank');
+      a.setAttribute('data-id', id);
+      a.addEventListener('click', () => {
+        watchedState.visitedLinkID = id;
+      });
+      a.textContent = title;
+      const button = document.createElement('button');
+      button.setAttribute('data-id', id);
+      button.setAttribute('data-toggle', 'modal');
+      button.setAttribute('data-target', '#modal');
+      button.classList.add('btn', 'btn-primary', 'btn-sm');
+      button.textContent = i18instance.t('buttons.openModal');
+      button.addEventListener('click', ({ target }) => {
+        watchedState.modal.title = title;
+        watchedState.modal.body = description;
+        watchedState.modal.link = link;
+        watchedState.visitedLinkID = target.dataset.id;
+      });
+      newPost.appendChild(a);
+      newPost.appendChild(button);
+      postsGroup.appendChild(newPost);
+    },
+  );
   postsContainer.appendChild(postsHeader);
   postsContainer.appendChild(postsGroup);
   watchedState.form.processState = 'finished';
@@ -102,10 +124,31 @@ const updateFieldState = (value, elements) => {
   }
 };
 
+const toggleModal = (watchedState, elements) => {
+  const { modal } = elements;
+  const modalTitle = modal.querySelector('.modal-title');
+  const modalBody = modal.querySelector('.modal-body');
+  const linkButton = modal.querySelector('.full-article');
+  modalTitle.textContent = watchedState.modal.title;
+  modalBody.textContent = watchedState.modal.body;
+  linkButton.setAttribute('href', watchedState.modal.link);
+};
+
+const markVisited = (id, watchedState) => {
+  const postLink = document.querySelector(`a[data-id="${id}"]`);
+  postLink.classList.remove('font-weight-bold');
+  postLink.classList.add('font-weight-normal');
+
+  const post = watchedState.form.posts.find((item) => id === item.id);
+  post.visited = true;
+};
+
 export {
   renderFeedback,
   renderFeeds,
   renderPosts,
   processStateHandler,
   updateFieldState,
+  toggleModal,
+  markVisited,
 };

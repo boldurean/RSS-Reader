@@ -52,6 +52,7 @@ const extractPosts = (parsedData) => {
       title: postTitle,
       link: postLink,
       description: postDescription,
+      visited: false,
     };
     return [...acc, newPost];
   }, []);
