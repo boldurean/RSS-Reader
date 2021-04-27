@@ -52,15 +52,15 @@ const renderPosts = (watchedState, elements, i18instance) => {
   watchedState.form.posts.forEach(
     ({ title, description, link, id, visited }) => {
       const newPost = document.createElement('li');
-      const visitedClass = visited ? 'font-weight-normal' : 'font-weight-bold';
       newPost.classList.add(
         'list-group-item',
         'd-flex',
         'justify-content-between',
         'align-items-start',
-        visitedClass,
       );
       const a = document.createElement('a');
+      const visitedClass = visited ? 'font-weight-normal' : 'font-weight-bold';
+      a.classList.add(visitedClass);
       a.setAttribute('href', link);
       a.setAttribute('target', '_blank');
       a.setAttribute('data-id', id);
