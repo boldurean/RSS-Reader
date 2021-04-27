@@ -80,6 +80,9 @@ export default () => {
       case 'visitedLinkID':
         markVisited(value, watchedState);
         break;
+      case 'form.feedbackMsg':
+        renderFeedback(value, watchedState, elements, i18instance);
+        break;
       default:
     }
   });

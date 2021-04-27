@@ -19,11 +19,11 @@ const getRssData = (url, watchedState, i18instance) => {
     .get(urlWithProxy)
     .then((response) => response.data.contents)
     .then((data) => parse(data))
-    .catch((error) => {
+    .catch((e) => {
       watchedState.form.processState = 'failed';
       watchedState.form.feedbackStatus = 'text-danger';
-      watchedState.form.feedbackMsg = i18instance.t('feedback.errors.network');
-      return error.message;
+      watchedState.form.feedbackMsg = i18instance.t('errors.network');
+      return Promise.reject(e);
     });
 };
 

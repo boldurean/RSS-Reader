@@ -92,3 +92,18 @@ test('link without RSS content', async () => {
   });
   scope.done();
 });
+
+test('network error', async () => {
+  await userEvent.type(elements.input, 'https://vsbdn.io');
+
+  const scope = nock(corsProxy)
+    .get(corsProxyApi)
+    .query({ url: 'https://vsbdn.io', disableCache: 'true' })
+    .reply(404);
+
+  await userEvent.click(elements.addButton);
+  await waitFor(() => {
+    expect(document.body).toHaveTextContent('Ошибка сети');
+  });
+  scope.done();
+});
