@@ -77,7 +77,7 @@ export default () => {
       case 'modal.link':
         toggleModal(watchedState, elements);
         break;
-      case 'linkVisitedID':
+      case 'visitedLinkID':
         markVisited(value, watchedState);
         break;
       default:
