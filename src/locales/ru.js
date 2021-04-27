@@ -1,7 +1,7 @@
 export default {
   translation: {
     errors: {
-      network: 'Неизвестные проблемы с сетью, попробуйте еще раз',
+      network: 'Ошибка сети',
       validation: {
         invalid: 'Ссылка должна быть валидным URL',
         existing: 'RSS уже существует',

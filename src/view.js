@@ -74,11 +74,11 @@ const renderPosts = (watchedState, elements, i18instance) => {
       button.setAttribute('data-target', '#modal');
       button.classList.add('btn', 'btn-primary', 'btn-sm');
       button.textContent = i18instance.t('buttons.openModal');
-      button.addEventListener('click', ({ target }) => {
+      button.addEventListener('click', () => {
         watchedState.modal.title = title;
         watchedState.modal.body = description;
         watchedState.modal.link = link;
-        watchedState.visitedLinkID = target.dataset.id;
+        watchedState.visitedLinkID = id;
       });
       newPost.appendChild(a);
       newPost.appendChild(button);
