@@ -91,19 +91,23 @@ const renderPosts = (watchedState, elements, i18instance) => {
 };
 
 const processStateHandler = (processState, elements) => {
-  const { submitButton } = elements;
+  const { submitButton, urlField } = elements;
   switch (processState) {
     case 'filling':
       submitButton.disabled = false;
+      urlField.removeAttribute('readonly');
       break;
     case 'sending':
       submitButton.disabled = true;
+      urlField.setAttribute('readonly', 'readonly');
       break;
     case 'finished':
       submitButton.disabled = false;
+      urlField.removeAttribute('readonly');
       break;
     case 'failed':
       submitButton.disabled = false;
+      urlField.removeAttribute('readonly');
       break;
     default:
       throw new Error(`Unknown state: ${processState}`);
