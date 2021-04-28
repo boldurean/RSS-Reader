@@ -19,7 +19,6 @@ extends:
   - 'plugin:functional/recommended'
   - 'plugin:jest-dom/recommended'
   - 'plugin:testing-library/dom'
-  - 'prettier'
 
 parserOptions:
   ecmaVersion: 2020

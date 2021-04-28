@@ -3,4 +3,3 @@
 
 eslint --fix .
 npx eslint .
-pretty-quick --staged

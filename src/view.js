@@ -57,7 +57,9 @@ const renderPosts = (watchedState, elements, i18instance) => {
   const postsGroup = document.createElement('ul');
   postsGroup.classList.add('list-group', 'mb-5');
   watchedState.form.posts.forEach(
-    ({ title, description, link, id, visited }) => {
+    ({
+      title, description, link, id, visited,
+    }) => {
       const newPost = document.createElement('li');
       newPost.classList.add(
         'list-group-item',

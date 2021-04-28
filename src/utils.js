@@ -58,4 +58,6 @@ const extractPosts = (parsedData) => {
   }, []);
 };
 
-export { addProxy, getRssData, extractFeed, extractPosts };
+export {
+  addProxy, getRssData, extractFeed, extractPosts,
+};
