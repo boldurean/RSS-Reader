@@ -9,10 +9,10 @@ import init from '../src/init.js';
 const rssUrl = 'https://ru.hexlet.io/lessons.rss';
 const corsProxy = 'https://hexlet-allorigins.herokuapp.com';
 const corsProxyApi = '/get';
+const domparser = new DOMParser();
 
 const pathToRss = path.resolve(__dirname, '__fixtures__/rss.txt');
-const pathToHtml = path.resolve('./', 'index.html');
-
+const pathToHTML = path.resolve(__dirname, '../index.html');
 // eslint-disable-next-line functional/no-let
 let elements;
 // eslint-disable-next-line functional/no-let
@@ -22,9 +22,9 @@ let html;
 
 beforeEach(async () => {
   rss = await fs.readFile(pathToRss, 'utf-8');
-  html = await fs.readFile(pathToHtml, 'utf-8');
-
-  document.body.innerHTML = html;
+  html = await fs.readFile(pathToHTML)
+    .then((data) => domparser.parseFromString(data, 'text/html'));
+  document.body.innerHTML = html.querySelector('body').innerHTML;
 
   elements = {
     addButton: screen.getByText(/Add/i),
