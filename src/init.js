@@ -5,13 +5,13 @@ import initAutoupdate from './autoupdate.js';
 import resources from './locales/resources.js';
 import { getRssData, extractFeed, extractPosts } from './utils.js';
 import validate from './validate.js';
+import 'bootstrap';
 import {
   renderFeedback,
   renderPosts,
   renderFeeds,
   processStateHandler,
   updateFieldState,
-  toggleModal,
   markVisited,
 } from './view.js';
 
@@ -52,6 +52,9 @@ export default () => {
     feedback: document.querySelector('div.feedback'),
     urlField: document.querySelector('input[name="url"]'),
     modal: document.querySelector('.modal'),
+    modalTitle: document.querySelector('.modal-title'),
+    modalBody: document.querySelector('.modal-body'),
+    linkButton: document.querySelector('.full-article'),
   };
 
   const watchedState = onChange(state, (path, value) => {
@@ -73,9 +76,6 @@ export default () => {
         break;
       case 'form.posts':
         renderPosts(watchedState, elements, i18instance);
-        break;
-      case 'modal.link':
-        toggleModal(watchedState, elements);
         break;
       case 'visitedLinkID':
         markVisited(value, watchedState);

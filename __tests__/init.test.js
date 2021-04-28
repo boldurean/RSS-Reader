@@ -107,3 +107,30 @@ test('network error', async () => {
   });
   scope.done();
 });
+
+test.only('modal', async () => {
+  nock(corsProxy)
+    .get(corsProxyApi)
+    .query({ url: rssUrl, disableCache: 'true' })
+    .reply(200, { contents: rss });
+
+  userEvent.type(screen.getByRole('textbox', { name: 'url' }), rssUrl);
+  userEvent.click(screen.getByRole('button', { name: 'add' }));
+
+  const previewBtns = await screen.findAllByRole('button', {
+    name: /Просмотр/i,
+  });
+  expect(
+    screen.getByRole('link', { name: /Миксины \/ HTML: Препроцессор Pug/i }),
+  ).toHaveClass('font-weight-bold');
+  userEvent.click(previewBtns[0]);
+  console.log(document.querySelector('.modal').classList.contains('show'));
+  expect(
+    await screen.findByText(
+      'Цель: Научиться создавать миксины для переиспользования вёрстки внутри Pug. Узнать о передаче аргументов и конструкции block',
+    ),
+  ).toBeVisible();
+  expect(
+    screen.getByRole('link', { name: /Миксины \/ HTML: Препроцессор Pug/i }),
+  ).not.toHaveClass('font-weight-bold');
+});

@@ -41,6 +41,14 @@ const renderFeeds = (watchedState, elements, i18instance) => {
   watchedState.form.processState = 'finished';
 };
 
+const updateModal = (watchedState, elements) => {
+  const { modalTitle, modalBody, linkButton } = elements;
+  modalTitle.textContent = watchedState.modal.title;
+  modalBody.textContent = watchedState.modal.body;
+  linkButton.setAttribute('href', watchedState.modal.link);
+  console.log('ЗАМЕНИЛ В МОДАЛКЕ ТЕКСТЫ!');
+};
+
 const renderPosts = (watchedState, elements, i18instance) => {
   const { postsContainer } = elements;
   if (!watchedState.form.posts) return;
@@ -73,12 +81,18 @@ const renderPosts = (watchedState, elements, i18instance) => {
       button.setAttribute('data-toggle', 'modal');
       button.setAttribute('data-target', '#modal');
       button.classList.add('btn', 'btn-primary', 'btn-sm');
-      button.textContent = i18instance.t('buttons.openModal');
+      button.textContent = 'Просмотр';
       button.addEventListener('click', () => {
+        console.log('ЗАПИСЫВАЮ ТЕКСТЫ В ВОТЧЕР!');
         watchedState.modal.title = title;
         watchedState.modal.body = description;
         watchedState.modal.link = link;
         watchedState.visitedLinkID = id;
+        console.log(watchedState.modal.title);
+        console.log(watchedState.modal.body);
+        console.log(watchedState.modal.link);
+        console.log('Записал, обновляю');
+        updateModal(watchedState, elements);
       });
       newPost.appendChild(a);
       newPost.appendChild(button);
@@ -128,16 +142,6 @@ const updateFieldState = (value, elements) => {
   }
 };
 
-const toggleModal = (watchedState, elements) => {
-  const { modal } = elements;
-  const modalTitle = modal.querySelector('.modal-title');
-  const modalBody = modal.querySelector('.modal-body');
-  const linkButton = modal.querySelector('.full-article');
-  modalTitle.textContent = watchedState.modal.title;
-  modalBody.textContent = watchedState.modal.body;
-  linkButton.setAttribute('href', watchedState.modal.link);
-};
-
 const markVisited = (id, watchedState) => {
   const postLink = document.querySelector(`a[data-id="${id}"]`);
   postLink.classList.remove('font-weight-bold');
@@ -153,6 +157,5 @@ export {
   renderPosts,
   processStateHandler,
   updateFieldState,
-  toggleModal,
   markVisited,
 };

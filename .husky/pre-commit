@@ -3,6 +3,4 @@
 
 eslint --fix .
 npx eslint .
-make test
-make test-coverage
 pretty-quick --staged
