@@ -124,7 +124,6 @@ test('modal', async () => {
     screen.getByRole('link', { name: /Миксины \/ HTML: Препроцессор Pug/i }),
   ).toHaveClass('font-weight-bold');
   userEvent.click(previewBtns[0]);
-  console.log(document.querySelector('.modal').classList.contains('show'));
   expect(
     await screen.findByText(
       'Цель: Научиться создавать миксины для переиспользования вёрстки внутри Pug. Узнать о передаче аргументов и конструкции block',

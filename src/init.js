@@ -5,7 +5,7 @@ import initAutoupdate from './autoupdate.js';
 import resources from './locales/resources.js';
 import { getRssData, extractFeed, extractPosts } from './utils.js';
 import validate from './validate.js';
-import 'bootstrap';
+import 'bootstrap/dist/js/bootstrap.bundle.js';
 import {
   renderFeedback,
   renderPosts,
