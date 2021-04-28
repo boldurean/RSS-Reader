@@ -108,7 +108,7 @@ test('network error', async () => {
   scope.done();
 });
 
-test.only('modal', async () => {
+test('modal', async () => {
   nock(corsProxy)
     .get(corsProxyApi)
     .query({ url: rssUrl, disableCache: 'true' })

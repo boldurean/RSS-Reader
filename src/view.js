@@ -72,10 +72,10 @@ const renderPosts = (watchedState, elements, i18instance) => {
       a.setAttribute('href', link);
       a.setAttribute('target', '_blank');
       a.setAttribute('data-id', id);
+      a.textContent = title;
       a.addEventListener('click', () => {
         watchedState.visitedLinkID = id;
       });
-      a.textContent = title;
       const button = document.createElement('button');
       button.setAttribute('data-id', id);
       button.setAttribute('data-toggle', 'modal');
