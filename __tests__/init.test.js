@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/dom';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import nock from 'nock';
 import init from '../src/init.js';
@@ -13,20 +13,18 @@ const corsProxyApi = '/get';
 const pathToRss = path.resolve(__dirname, '__fixtures__/rss.txt');
 const pathToHtml = path.resolve(__dirname, '__fixtures__/index.html');
 
+const rss = fs.readFileSync(pathToRss, 'utf-8');
+const html = fs.readFileSync(pathToHtml, 'utf-8');
+
+// eslint-disable-next-line functional/no-let
 let elements;
-let html;
-let rss;
 
-beforeEach(async () => {
-  rss = await fs.readFile(pathToRss, 'utf-8');
-  html = await fs.readFile(pathToHtml, 'utf-8');
+beforeEach(() => {
   document.body.innerHTML = html;
-
   elements = {
     addButton: screen.getByText(/Add/i),
     input: screen.getByRole('textbox', { name: /url/i }),
   };
-
   init();
 });
 
