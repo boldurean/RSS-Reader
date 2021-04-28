@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/dom';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import fs from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import nock from 'nock';
 import init from '../src/init.js';
@@ -11,16 +11,21 @@ const corsProxy = 'https://hexlet-allorigins.herokuapp.com';
 const corsProxyApi = '/get';
 
 const pathToRss = path.resolve(__dirname, '__fixtures__/rss.txt');
-const pathToHtml = path.resolve(__dirname, '__fixtures__/index.html');
-
-const rss = fs.readFileSync(pathToRss, 'utf-8');
-const html = fs.readFileSync(pathToHtml, 'utf-8');
+const pathToHtml = path.resolve('./', 'index.html');
 
 // eslint-disable-next-line functional/no-let
 let elements;
+// eslint-disable-next-line functional/no-let
+let rss;
+// eslint-disable-next-line functional/no-let
+let html;
 
-beforeEach(() => {
+beforeEach(async () => {
+  rss = await fs.readFile(pathToRss, 'utf-8');
+  html = await fs.readFile(pathToHtml, 'utf-8');
+
   document.body.innerHTML = html;
+
   elements = {
     addButton: screen.getByText(/Add/i),
     input: screen.getByRole('textbox', { name: /url/i }),
