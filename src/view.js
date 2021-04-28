@@ -46,7 +46,6 @@ const updateModal = (watchedState, elements) => {
   modalTitle.textContent = watchedState.modal.title;
   modalBody.textContent = watchedState.modal.body;
   linkButton.setAttribute('href', watchedState.modal.link);
-  console.log('ЗАМЕНИЛ В МОДАЛКЕ ТЕКСТЫ!');
 };
 
 const renderPosts = (watchedState, elements, i18instance) => {
@@ -83,15 +82,10 @@ const renderPosts = (watchedState, elements, i18instance) => {
       button.classList.add('btn', 'btn-primary', 'btn-sm');
       button.textContent = 'Просмотр';
       button.addEventListener('click', () => {
-        console.log('ЗАПИСЫВАЮ ТЕКСТЫ В ВОТЧЕР!');
         watchedState.modal.title = title;
         watchedState.modal.body = description;
         watchedState.modal.link = link;
         watchedState.visitedLinkID = id;
-        console.log(watchedState.modal.title);
-        console.log(watchedState.modal.body);
-        console.log(watchedState.modal.link);
-        console.log('Записал, обновляю');
         updateModal(watchedState, elements);
       });
       newPost.appendChild(a);
