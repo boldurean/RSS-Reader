@@ -23,7 +23,7 @@ Will create dist directiry ready for uploading to your server.
 make build
 ```
 
-###Usage: 
+### Usage: 
 
 Paste a **valid RSS** link in the field and pres **Add** 
 
