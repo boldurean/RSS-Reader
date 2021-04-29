@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/dom';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import nock from 'nock';
 import init from '../src/init.js';
@@ -15,19 +15,15 @@ const pathToRss = path.resolve(__dirname, '__fixtures__/rss.txt');
 const pathToHTML = path.resolve(__dirname, '../index.html');
 // eslint-disable-next-line functional/no-let
 let elements;
-// eslint-disable-next-line functional/no-let
-let rss;
-// eslint-disable-next-line functional/no-let
-let html;
+const rss = fs.readFileSync(pathToRss, 'utf-8');
+const htmlString = fs.readFileSync(pathToHTML, 'utf-8');
+const html = domparser.parseFromString(htmlString, 'text/html');
 
 beforeEach(async () => {
-  rss = await fs.readFile(pathToRss, 'utf-8');
-  html = await fs.readFile(pathToHTML)
-    .then((data) => domparser.parseFromString(data, 'text/html'));
   document.body.innerHTML = html.querySelector('body').innerHTML;
 
   elements = {
-    addButton: screen.getByText(/Add/i),
+    addButton: screen.getByRole('button', { name: /Add/i }),
     input: screen.getByRole('textbox', { name: /url/i }),
   };
   init();
@@ -44,6 +40,7 @@ test('invalid link', async () => {
   expect(
     screen.queryByText('Ссылка должна быть валидным URL'),
   ).toBeInTheDocument();
+  expect(elements.input).toHaveClass('is-invalid');
 });
 
 test('successful RSS', async () => {
@@ -71,7 +68,6 @@ test('existing RSS', async () => {
   await waitFor(() => {
     expect(document.body).toHaveTextContent('RSS успешно загружен');
   });
-  expect(elements.input).not.toHaveClass('is-invalid');
   scope.done();
   await userEvent.type(elements.input, rssUrl);
   await userEvent.click(elements.addButton);
