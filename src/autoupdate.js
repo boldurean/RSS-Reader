@@ -10,8 +10,8 @@ const autoUpdate = (watchedState) => {
       const proxedUrl = addProxy(feedUrl);
       return axios
         .get(proxedUrl)
-        .then((response) => response.data)
-        .then((data) => parse(data))
+        .then((response) => response.data.contents)
+        .then((data) => parse(data, feedUrl))
         .then(([, newPosts]) => {
           const oldPosts = watchedState.posts;
           const updated = _.differenceBy(newPosts, oldPosts, 'link');

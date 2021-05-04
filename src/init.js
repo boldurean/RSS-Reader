@@ -81,8 +81,8 @@ export default () => {
       const proxedUrl = addProxy(url);
       return axios
         .get(proxedUrl)
-        .then((response) => response.data)
-        .then((content) => parse(content))
+        .then((response) => response.data.contents)
+        .then((content) => parse(content, url))
         .then(([newFeed, newPosts]) => {
           const oldFeeds = watchedState.feeds;
           watchedState.feeds = [...newFeed, ...oldFeeds];

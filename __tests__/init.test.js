@@ -48,10 +48,7 @@ test('successful RSS', async () => {
   const scope = nock(corsProxy)
     .get(corsProxyApi)
     .query({ url: rssUrl, disableCache: 'true' })
-    .reply(200, {
-      status: { url: rssUrl },
-      contents: rss,
-    });
+    .reply(200, { contents: rss });
   await userEvent.click(elements.addButton);
   await waitFor(() => {
     expect(document.body).toHaveTextContent('RSS успешно загружен');
@@ -65,10 +62,7 @@ test('existing RSS', async () => {
   const scope = nock(corsProxy)
     .get(corsProxyApi)
     .query({ url: rssUrl, disableCache: 'true' })
-    .reply(200, {
-      status: { url: rssUrl },
-      contents: rss,
-    });
+    .reply(200, { contents: rss });
 
   await userEvent.click(elements.addButton);
   await waitFor(() => {
@@ -89,10 +83,7 @@ test('link without RSS content', async () => {
   const scope = nock(corsProxy)
     .get(corsProxyApi)
     .query({ url: 'https://hexlet.io', disableCache: 'true' })
-    .reply(200, {
-      status: { url: rssUrl },
-      contents: html,
-    });
+    .reply(200, { contents: html });
 
   await userEvent.click(elements.addButton);
   await waitFor(() => {
@@ -120,10 +111,7 @@ test('modal', async () => {
   nock(corsProxy)
     .get(corsProxyApi)
     .query({ url: rssUrl, disableCache: 'true' })
-    .reply(200, {
-      status: { url: rssUrl },
-      contents: rss,
-    });
+    .reply(200, { contents: rss });
 
   userEvent.type(screen.getByRole('textbox', { name: 'url' }), rssUrl);
   userEvent.click(screen.getByRole('button', { name: 'add' }));
