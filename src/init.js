@@ -1,120 +1,109 @@
 // @ts-check
-import onChange from 'on-change';
+import axios from 'axios';
 import i18next from 'i18next';
+import * as yup from 'yup';
 import initAutoupdate from './autoupdate.js';
 import resources from './locales/resources.js';
-import { getRssData, extractFeed, extractPosts } from './utils.js';
-import validate from './validate.js';
-import 'bootstrap';
 import {
-  renderFeedback,
-  renderPosts,
-  renderFeeds,
-  processStateHandler,
-  updateFieldState,
-  markVisited,
-} from './view.js';
+  addProxy,
+} from './utils.js';
+import watcher from './view.js';
+import parse from './parser.js';
+import 'bootstrap';
 
 export default () => {
-  const defaultLanguage = 'ru';
   const i18instance = i18next.createInstance();
 
-  i18instance.init({
-    lng: defaultLanguage,
+  return i18instance.init({
+    lng: 'ru',
     resources,
-  });
-
-  const state = {
-    lng: defaultLanguage,
-    form: {
-      processState: 'filling',
-      feedbackMsg: null,
-      feedbackStatus: null,
-      url: '',
+  }).then(() => {
+    yup.setLocale({
+      string: {
+        url: 'invalid',
+      },
+    });
+  }).then(() => {
+    const defaultLanguage = 'ru';
+    const state = {
+      lng: defaultLanguage,
+      form: {
+        processState: 'filling',
+        url: '',
+        valid: true,
+        errors: {},
+      },
       feeds: [],
       posts: [],
-      valid: true,
-      errors: null,
-    },
-    modal: {
-      title: null,
-      body: null,
-      link: null,
-    },
-    visitedLinkID: null,
-  };
+      modal: {
+        title: null,
+        body: null,
+        link: null,
+      },
+      uiState: {
+        links: {
+          visitedLink: null,
+          visitedLinks: [],
+        },
+      },
+    };
 
-  const elements = {
-    form: document.querySelector('.rss-form'),
-    submitButton: document.querySelector('button[type="submit"]'),
-    feedsContainer: document.querySelector('.feeds'),
-    postsContainer: document.querySelector('.posts'),
-    feedback: document.querySelector('div.feedback'),
-    urlField: document.querySelector('input[name="url"]'),
-    modal: document.querySelector('.modal'),
-    modalTitle: document.querySelector('.modal-title'),
-    modalBody: document.querySelector('.modal-body'),
-    linkButton: document.querySelector('.full-article'),
-  };
+    const watchedState = watcher(state, i18instance);
 
-  const watchedState = onChange(state, (path, value) => {
-    switch (path) {
-      case 'form.processState':
-        processStateHandler(value, elements);
-        break;
-      case 'form.valid':
-        updateFieldState(value, elements);
-        break;
-      case 'form.url':
-        validate(watchedState, i18instance);
-        break;
-      case 'form.errors':
-        renderFeedback(value, watchedState, elements, i18instance);
-        break;
-      case 'form.feeds':
-        renderFeeds(watchedState, elements, i18instance);
-        break;
-      case 'form.posts':
-        renderPosts(watchedState, elements, i18instance);
-        break;
-      case 'visitedLinkID':
-        markVisited(value, watchedState);
-        break;
-      case 'form.feedbackMsg':
-        renderFeedback(value, watchedState, elements, i18instance);
-        break;
-      default:
-    }
-  });
-
-  elements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(e.target);
-    const url = data.get('url');
-    watchedState.form.url = '';
-    watchedState.form.url = url;
-    if (!watchedState.form.valid) return;
-    getRssData(url, watchedState, i18instance)
-      .then((parsedData) => {
-        const oldFeeds = watchedState.form.feeds;
-        const newFeed = extractFeed(parsedData, watchedState);
-        watchedState.form.feeds = [...newFeed, ...oldFeeds];
-
-        const oldPosts = watchedState.form.posts;
-        const newPosts = extractPosts(parsedData);
-        watchedState.form.posts = [...newPosts, ...oldPosts];
-
-        watchedState.form.processState = 'finished';
-        watchedState.form.feedbackStatus = 'text-success';
-        watchedState.form.errors = '';
-        elements.form.reset();
-      })
-      .catch((error) => {
-        watchedState.form.processState = 'failed';
-        watchedState.form.feedbackStatus = 'text-danger';
-        watchedState.form.errors = i18instance.t('errors.parse.isnotrss');
-        return error;
+    const validate = (url) => {
+      const loadedUrls = watchedState.feeds.map((feed) => feed.url);
+      const schema = yup.object().shape({
+        url: yup
+          .string()
+          .url()
+          .notOneOf(loadedUrls, 'existing'),
       });
+      return schema.validateSync({ url });
+    };
+
+    const form = document.querySelector('.rss-form');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const url = data.get('url');
+      watchedState.form.url = url;
+      try {
+        validate(url);
+        watchedState.form.errors = {};
+      } catch (error) {
+        watchedState.form.valid = false;
+        watchedState.form.errors = { validation: error.message };
+        watchedState.form.processState = 'failed';
+        return error;
+      }
+      watchedState.form.processState = 'sending';
+      const proxedUrl = addProxy(url);
+      return axios
+        .get(proxedUrl)
+        .then((response) => response.data)
+        .then((content) => parse(content))
+        .then(([newFeed, newPosts]) => {
+          const oldFeeds = watchedState.feeds;
+          watchedState.feeds = [...newFeed, ...oldFeeds];
+
+          const oldPosts = watchedState.posts;
+          watchedState.posts = [...newPosts, ...oldPosts];
+
+          watchedState.form.processState = 'finished';
+          form.reset();
+        })
+        .catch((error) => {
+          if (error.isAxiosError) {
+            watchedState.form.errors.network = 'network';
+            watchedState.form.processState = 'failed';
+            return error;
+          }
+          watchedState.form.errors.parse = 'parse';
+          watchedState.form.processState = 'failed';
+          return error;
+        });
+    });
+    initAutoupdate(watchedState);
   });
-  initAutoupdate(watchedState);
 };

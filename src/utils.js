@@ -1,36 +1,18 @@
-import axios from 'axios';
 import _ from 'lodash';
-import parse from './parser.js';
 
 const addProxy = (url) => {
-  const urlWithProxy = new URL(
+  const proxedUrl = new URL(
     '/get',
     'https://hexlet-allorigins.herokuapp.com',
   );
-  urlWithProxy.searchParams.set('url', url);
-  urlWithProxy.searchParams.set('disableCache', 'true');
-  return urlWithProxy.toString();
+  proxedUrl.searchParams.set('url', url);
+  proxedUrl.searchParams.set('disableCache', 'true');
+  return proxedUrl.toString();
 };
 
-const getRssData = (url, watchedState, i18instance) => {
-  watchedState.form.processState = 'sending';
-  const urlWithProxy = addProxy(url);
-  return axios
-    .get(urlWithProxy)
-    .then((response) => response.data.contents)
-    .then((data) => parse(data))
-    .catch((e) => {
-      watchedState.form.processState = 'failed';
-      watchedState.form.feedbackStatus = 'text-danger';
-      watchedState.form.feedbackMsg = i18instance.t('errors.network');
-      return Promise.reject(e);
-    });
-};
-
-const extractFeed = (parsedData, watchedState) => {
-  const feedURL = watchedState.form.url;
-  const feedTitle = parsedData.querySelector('title').textContent;
-  const feedDescription = parsedData.querySelector('description').textContent;
+const extractFeed = (data, feedURL) => {
+  const feedTitle = data.querySelector('title').textContent;
+  const feedDescription = data.querySelector('description').textContent;
   return [
     {
       url: feedURL,
@@ -40,24 +22,23 @@ const extractFeed = (parsedData, watchedState) => {
   ];
 };
 
-const extractPosts = (parsedData) => {
-  const items = parsedData.querySelectorAll('item');
+const extractPosts = (data) => {
+  const items = data.querySelectorAll('item');
 
   return [...items].reduce((acc, item) => {
     const postTitle = item.querySelector('title').textContent;
     const postLink = item.querySelector('link').textContent;
     const postDescription = item.querySelector('description').textContent;
     const newPost = {
-      id: _.uniqueId(),
       title: postTitle,
-      link: postLink,
       description: postDescription,
-      visited: false,
+      link: postLink,
+      id: _.uniqueId(),
     };
     return [...acc, newPost];
   }, []);
 };
 
 export {
-  addProxy, getRssData, extractFeed, extractPosts,
+  addProxy, extractFeed, extractPosts,
 };

@@ -2,13 +2,9 @@ export default {
   translation: {
     errors: {
       network: 'Ошибка сети',
-      validation: {
-        invalid: 'Ссылка должна быть валидным URL',
-        existing: 'RSS уже существует',
-      },
-      parse: {
-        isnotrss: 'Ресурс не содержит валидный RSS',
-      },
+      invalid: 'Ссылка должна быть валидным URL',
+      existing: 'RSS уже существует',
+      parse: 'Ресурс не содержит валидный RSS',
     },
     feedback: {
       success: 'RSS успешно загружен',
