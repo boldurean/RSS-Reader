@@ -1,13 +1,10 @@
 import onChange from 'on-change';
 
-const getErrorType = (errors, i18instance) => {
-  if (errors.validation) {
-    return i18instance.t(`errors.${errors.validation}`);
+const getErrorType = (watchedState, i18instance) => {
+  if (watchedState.form.error) {
+    return i18instance.t(`errors.${watchedState.form.error}`);
   }
-  if (errors.network) {
-    return i18instance.t(`errors.${errors.network}`);
-  }
-  return i18instance.t(`errors.${errors.parse}`);
+  return i18instance.t(`errors.${watchedState.rssLoading.error}`);
 };
 
 const renderFeeds = (watchedState, i18instance) => {
@@ -40,9 +37,11 @@ const updateModal = (watchedState) => {
   const modalTitle = document.querySelector('.modal-title');
   const modalBody = document.querySelector('.modal-body');
   const linkButton = document.querySelector('.full-article');
-  modalTitle.textContent = watchedState.modal.title;
-  modalBody.textContent = watchedState.modal.body;
-  linkButton.setAttribute('href', watchedState.modal.link);
+  const post = watchedState.posts.find((item) => item.id === watchedState.modal.postID);
+  const { title, description, link } = post;
+  modalTitle.textContent = title;
+  modalBody.textContent = description;
+  linkButton.setAttribute('href', link);
 };
 
 const renderPosts = (watchedState, i18instance) => {
@@ -56,7 +55,7 @@ const renderPosts = (watchedState, i18instance) => {
   postsGroup.classList.add('list-group', 'mb-5');
   watchedState.posts.forEach(
     ({
-      title, description, link, id,
+      title, link, id,
     }) => {
       const newPost = document.createElement('li');
       newPost.classList.add(
@@ -66,16 +65,17 @@ const renderPosts = (watchedState, i18instance) => {
         'align-items-start',
       );
       const a = document.createElement('a');
-      const isVisited = watchedState.uiState.links.visitedLinks.includes(id);
+      const isVisited = watchedState.uiState.links.visited.includes(id);
       const visitedClass = isVisited ? 'font-weight-normal' : 'font-weight-bold';
       a.classList.add(visitedClass);
       a.setAttribute('href', link);
       a.setAttribute('target', '_blank');
       a.setAttribute('data-id', id);
       a.textContent = title;
-      a.addEventListener('click', () => {
-        watchedState.uiState.links.visitedLink = id;
-        watchedState.uiState.links.visitedLinks.push(id);
+      a.addEventListener('click', (e) => {
+        e.target.classList.remove('font-weight-bold');
+        e.target.classList.add('font-weight-normal');
+        watchedState.uiState.links.visited.push(id);
       });
       const button = document.createElement('button');
       button.setAttribute('data-id', id);
@@ -83,12 +83,11 @@ const renderPosts = (watchedState, i18instance) => {
       button.setAttribute('data-target', '#modal');
       button.classList.add('btn', 'btn-primary', 'btn-sm');
       button.textContent = 'Просмотр';
-      button.addEventListener('click', () => {
-        watchedState.modal.title = title;
-        watchedState.modal.body = description;
-        watchedState.modal.link = link;
-        watchedState.uiState.links.visitedLink = id;
-        watchedState.uiState.links.visitedLinks.push(id);
+      button.addEventListener('click', ({ target }) => {
+        watchedState.modal.postID = id;
+        watchedState.uiState.links.visited.push(id);
+        target.previousElementSibling.classList.remove('font-weight-bold');
+        target.previousElementSibling.classList.add('font-weight-normal');
         updateModal(watchedState);
       });
       newPost.appendChild(a);
@@ -130,24 +129,19 @@ const processStateHandler = (watchedState, i18instance) => {
       urlField.removeAttribute('readonly');
       urlField.classList.add('is-invalid');
       feedback.classList.add('text-danger');
-      feedback.textContent = getErrorType(watchedState.form.errors, i18instance);
+      feedback.textContent = getErrorType(watchedState, i18instance);
       break;
     default:
       throw new Error(`Unknown state: ${processState}`);
   }
 };
 
-const markVisited = (id) => {
-  const postLink = document.querySelector(`a[data-id="${id}"]`);
-  postLink.classList.remove('font-weight-bold');
-  postLink.classList.add('font-weight-normal');
-};
-
 const watcher = (state, i18instance) => {
-  const watchedState = onChange(state, (path, value) => {
+  const watchedState = onChange(state, (path) => {
     switch (path) {
       case 'form.processState':
-      case 'form.errors':
+      case 'form.error':
+      case 'rssLoading.error':
         processStateHandler(watchedState, i18instance);
         break;
       case 'feeds':
@@ -155,9 +149,6 @@ const watcher = (state, i18instance) => {
         break;
       case 'posts':
         renderPosts(watchedState, i18instance);
-        break;
-      case 'uiState.links.visitedLink':
-        markVisited(value);
         break;
       default:
     }
