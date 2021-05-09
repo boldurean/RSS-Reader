@@ -18,11 +18,11 @@ const addProxy = (url) => {
   return proxedUrl.toString();
 };
 
-const checkForNewPosts = (watchedState) => {
+const fetchForNewPosts = (watchedState) => {
   const updateData = () => {
-    const loadedFeedsUrls = watchedState.feeds
+    const loadedFeeds = watchedState.feeds
       .map(_.property('url'))
-      .map((feedUrl) => addProxy(feedUrl))
+      .map(addProxy)
       .map((proxedUrl) => axios
         .get(proxedUrl)
         .then((response) => response.data.contents)
@@ -32,101 +32,101 @@ const checkForNewPosts = (watchedState) => {
           const updated = _.differenceBy(newPosts, oldPosts, 'link');
           watchedState.posts = [...updated, ...oldPosts];
         }));
-    Promise.all(loadedFeedsUrls).then(setTimeout(updateData, 5000));
+    Promise.all(loadedFeeds)
+      .then(setTimeout(updateData, 5000));
   };
   setTimeout(updateData, 5000);
 };
 
-const i18instance = i18next.createInstance();
-
-const initI18n = () => i18instance.init({
-  lng: 'ru',
-  resources,
-}).then(() => {
-  yup.setLocale({
-    string: {
-      url: 'invalid',
-    },
-  });
-});
-
-const app = () => {
-  const state = {
-    form: {
-      processState: 'filling',
-      url: '',
-      error: null,
-    },
-    feeds: [],
-    posts: [],
-    modal: {
-      postID: null,
-    },
-    uiState: {
-      links: {
+export default () => {
+  const i18instance = i18next.createInstance();
+  i18instance.init({
+    lng: 'ru',
+    resources,
+  }).then(() => {
+    yup.setLocale({
+      string: {
+        url: 'invalid',
+      },
+    });
+  }).then(() => {
+    const state = {
+      form: {
+        processState: 'filling',
+        url: '',
+        error: null,
+      },
+      feeds: [],
+      posts: [],
+      modal: {
+        postID: null,
+      },
+      uiState: {
         visited: [],
       },
-    },
-    rssLoading: {
-      error: null,
-    },
-  };
+      rssLoading: {
+        error: null,
+      },
+    };
 
-  const watchedState = watcher(state, i18instance);
+    const watchedState = watcher(state, i18instance);
 
-  const validateField = (url) => {
-    const loadedUrls = watchedState.feeds.map((feed) => feed.url);
-    const schema = yup.object().shape({
-      url: yup
-        .string()
-        .url()
-        .notOneOf(loadedUrls, 'existing'),
-    });
-    return schema.validateSync({ url });
-  };
-
-  const form = document.querySelector('.rss-form');
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const data = new FormData(e.target);
-    const url = data.get('url');
-    watchedState.form.url = url;
-    try {
-      validateField(url);
-      watchedState.form.error = {};
-    } catch (error) {
-      watchedState.form.error = error.message;
-      watchedState.form.processState = 'failed';
-      return error;
-    }
-    watchedState.form.processState = 'sending';
-    return axios
-      .get(addProxy(url))
-      .then((response) => response.data.contents)
-      .then((content) => parseRSS(content, url))
-      .then(([newFeed, newPosts]) => {
-        watchedState.feeds = [...newFeed, ...watchedState.feeds];
-        watchedState.posts = [...newPosts, ...watchedState.posts];
-
-        watchedState.form.processState = 'finished';
-        form.reset();
-      })
-      .catch((error) => {
-        if (error.isAxiosError) {
-          watchedState.form.error = 'network';
-          watchedState.form.processState = 'failed';
-        }
-        if (error.isParsingError) {
-          watchedState.form.error = 'parse';
-          watchedState.form.processState = 'failed';
-        }
-        return error;
+    const validateField = (url) => {
+      const loadedUrls = watchedState.feeds.map((feed) => feed.url);
+      const schema = yup.object().shape({
+        url: yup
+          .string()
+          .url()
+          .notOneOf(loadedUrls, 'existing'),
       });
-  });
-  checkForNewPosts(watchedState);
-};
+      return schema.validateSync({ url });
+    };
 
-export default () => {
-  initI18n().then(app);
+    const form = document.querySelector('.rss-form');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(e.target);
+      const url = data.get('url');
+      watchedState.form.url = url;
+      try {
+        validateField(url);
+        watchedState.form.error = null;
+      } catch (error) {
+        watchedState.form.error = error.message;
+        watchedState.form.processState = 'failed';
+        return error;
+      }
+      watchedState.form.processState = 'sending';
+      return axios
+        .get(addProxy(url))
+        .then((response) => response.data.contents)
+        .then((content) => parseRSS(content))
+        .then(([newFeed, newPosts]) => {
+          newFeed = newFeed.map((feed) => ({ url, ...feed }));
+          newPosts = newPosts.map((post) => ({ id: _.uniqueId(), ...post }));
+          watchedState.feeds = [...newFeed, ...watchedState.feeds];
+          watchedState.posts = [...newPosts, ...watchedState.posts];
+
+          watchedState.form.processState = 'finished';
+          form.reset();
+        })
+        .catch((error) => {
+          if (error.isAxiosError) {
+            watchedState.form.error = 'network';
+            watchedState.form.processState = 'failed';
+            return error;
+          }
+          if (error.isParsingError) {
+            watchedState.form.error = 'parse';
+            watchedState.form.processState = 'failed';
+            return error;
+          }
+          watchedState.form.error = 'unknown';
+          watchedState.form.processState = 'failed';
+          return error;
+        });
+    });
+    fetchForNewPosts(watchedState);
+  });
 };

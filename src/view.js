@@ -65,7 +65,7 @@ const renderPosts = (watchedState, i18instance) => {
         'align-items-start',
       );
       const a = document.createElement('a');
-      const isVisited = watchedState.uiState.links.visited.includes(id);
+      const isVisited = watchedState.uiState.visited.includes(id);
       const visitedClass = isVisited ? 'font-weight-normal' : 'font-weight-bold';
       a.classList.add(visitedClass);
       a.setAttribute('href', link);
@@ -75,7 +75,7 @@ const renderPosts = (watchedState, i18instance) => {
       a.addEventListener('click', (e) => {
         e.target.classList.remove('font-weight-bold');
         e.target.classList.add('font-weight-normal');
-        watchedState.uiState.links.visited.push(id);
+        watchedState.uiState.visited.push(id);
       });
       const button = document.createElement('button');
       button.setAttribute('data-id', id);
@@ -85,7 +85,7 @@ const renderPosts = (watchedState, i18instance) => {
       button.textContent = 'Просмотр';
       button.addEventListener('click', ({ target }) => {
         watchedState.modal.postID = id;
-        watchedState.uiState.links.visited.push(id);
+        watchedState.uiState.visited.push(id);
         target.previousElementSibling.classList.remove('font-weight-bold');
         target.previousElementSibling.classList.add('font-weight-normal');
         updateModal(watchedState);

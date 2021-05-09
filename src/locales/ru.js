@@ -5,6 +5,7 @@ export default {
       invalid: 'Ссылка должна быть валидным URL',
       existing: 'RSS уже существует',
       parse: 'Ресурс не содержит валидный RSS',
+      unknown: 'Неизвестная ошибка, попробуйте еще раз',
     },
     feedback: {
       success: 'RSS успешно загружен',
