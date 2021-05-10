@@ -1,14 +1,14 @@
 import onChange from 'on-change';
 
-const getErrorType = (watchedState, i18instance) => {
+const getErrorMessage = (watchedState, i18instance) => {
   if (watchedState.form.error) {
     return i18instance.t(`errors.${watchedState.form.error}`);
   }
   return i18instance.t(`errors.${watchedState.rssLoading.error}`);
 };
 
-const renderFeeds = (watchedState, i18instance) => {
-  const feedsContainer = document.querySelector('.feeds');
+const renderFeeds = (watchedState, i18instance, elements) => {
+  const { feedsContainer } = elements;
 
   if (!watchedState.feeds) return;
   feedsContainer.innerHTML = '';
@@ -44,9 +44,8 @@ const updateModal = (watchedState) => {
   linkButton.setAttribute('href', link);
 };
 
-const renderPosts = (watchedState, i18instance) => {
-  const postsContainer = document.querySelector('.posts');
-
+const renderPosts = (watchedState, i18instance, elements) => {
+  const { postsContainer } = elements;
   if (!watchedState.posts) return;
   postsContainer.innerHTML = '';
   const postsHeader = document.createElement('h2');
@@ -99,22 +98,15 @@ const renderPosts = (watchedState, i18instance) => {
   postsContainer.appendChild(postsGroup);
 };
 
-const processStateHandler = (watchedState, i18instance) => {
+const formStateHandler = (watchedState, i18instance, elements) => {
   const { processState } = watchedState.form;
-  const submitButton = document.querySelector('button[type="submit"]');
-  const urlField = document.querySelector('input[name="url"]');
-  const feedback = document.querySelector('div.feedback');
+  const { submitButton, urlField, feedback } = elements;
 
   switch (processState) {
-    case 'filling':
+    case 'idle':
       submitButton.disabled = false;
       urlField.removeAttribute('readonly');
       urlField.classList.remove('is-invalid');
-      break;
-    case 'sending':
-      submitButton.disabled = true;
-      urlField.setAttribute('readonly', 'readonly');
-      feedback.classList.remove('text-success', 'text-danger', 'is-invalid');
       feedback.textContent = '';
       break;
     case 'finished':
@@ -129,26 +121,45 @@ const processStateHandler = (watchedState, i18instance) => {
       urlField.removeAttribute('readonly');
       urlField.classList.add('is-invalid');
       feedback.classList.add('text-danger');
-      feedback.textContent = getErrorType(watchedState, i18instance);
+      feedback.textContent = getErrorMessage(watchedState, i18instance);
       break;
     default:
       throw new Error(`Unknown state: ${processState}`);
   }
 };
 
-const watcher = (state, i18instance) => {
+const rssLoadingStateHandler = (watchedState, elements) => {
+  const { processState } = watchedState.rssLoading;
+  const { submitButton, urlField, feedback } = elements;
+
+  switch (processState) {
+    case 'sending':
+      submitButton.disabled = true;
+      urlField.setAttribute('readonly', 'readonly');
+      feedback.classList.remove('text-success', 'text-danger', 'is-invalid');
+      feedback.textContent = '';
+      break;
+    default:
+      throw new Error(`Unknown process state ${processState}`);
+  }
+};
+
+const watcher = (state, i18instance, elements) => {
   const watchedState = onChange(state, (path) => {
     switch (path) {
       case 'form.processState':
       case 'form.error':
       case 'rssLoading.error':
-        processStateHandler(watchedState, i18instance);
+        formStateHandler(watchedState, i18instance, elements);
+        break;
+      case 'rssLoading.processState':
+        rssLoadingStateHandler(watchedState, elements);
         break;
       case 'feeds':
-        renderFeeds(watchedState, i18instance);
+        renderFeeds(watchedState, i18instance, elements);
         break;
       case 'posts':
-        renderPosts(watchedState, i18instance);
+        renderPosts(watchedState, i18instance, elements);
         break;
       default:
     }

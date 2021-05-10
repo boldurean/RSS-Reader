@@ -18,7 +18,7 @@ const addProxy = (url) => {
   return proxedUrl.toString();
 };
 
-const fetchForNewPosts = (watchedState) => {
+const fetchNewPosts = (watchedState) => {
   const updateData = () => {
     const loadedFeeds = watchedState.feeds
       .map(_.property('url'))
@@ -40,7 +40,7 @@ const fetchForNewPosts = (watchedState) => {
 
 export default () => {
   const i18instance = i18next.createInstance();
-  i18instance.init({
+  return i18instance.init({
     lng: 'ru',
     resources,
   }).then(() => {
@@ -49,10 +49,9 @@ export default () => {
         url: 'invalid',
       },
     });
-  }).then(() => {
     const state = {
       form: {
-        processState: 'filling',
+        processState: 'idle',
         url: '',
         error: null,
       },
@@ -65,11 +64,21 @@ export default () => {
         visited: [],
       },
       rssLoading: {
+        processState: 'idle',
         error: null,
       },
     };
 
-    const watchedState = watcher(state, i18instance);
+    const elements = {
+      form: document.querySelector('.rss-form'),
+      urlField: document.querySelector('input[name="url"]'),
+      submitButton: document.querySelector('button[type="submit"]'),
+      feedback: document.querySelector('div.feedback'),
+      feedsContainer: document.querySelector('.feeds'),
+      postsContainer: document.querySelector('.posts'),
+    };
+
+    const watchedState = watcher(state, i18instance, elements);
 
     const validateField = (url) => {
       const loadedUrls = watchedState.feeds.map((feed) => feed.url);
@@ -82,51 +91,45 @@ export default () => {
       return schema.validateSync({ url });
     };
 
-    const form = document.querySelector('.rss-form');
+    const getErrorType = (error) => {
+      if (error.isAxiosError) return 'network';
+      if (error.isParsingError) return 'parse';
+      return 'unknown';
+    };
 
-    form.addEventListener('submit', (e) => {
+    elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
       const data = new FormData(e.target);
       const url = data.get('url');
       watchedState.form.url = url;
       try {
         validateField(url);
-        watchedState.form.error = null;
+        watchedState.form.processState = 'idle';
       } catch (error) {
         watchedState.form.error = error.message;
         watchedState.form.processState = 'failed';
         return error;
       }
-      watchedState.form.processState = 'sending';
+      watchedState.rssLoading.processState = 'sending';
       return axios
         .get(addProxy(url))
         .then((response) => response.data.contents)
         .then((content) => parseRSS(content))
-        .then(([newFeed, newPosts]) => {
-          newFeed = newFeed.map((feed) => ({ url, ...feed }));
-          newPosts = newPosts.map((post) => ({ id: _.uniqueId(), ...post }));
+        .then(([feed, newItems]) => {
+          const newFeed = [{ url, ...feed }];
+          const newPosts = newItems.map((post) => ({ id: _.uniqueId(), ...post }));
           watchedState.feeds = [...newFeed, ...watchedState.feeds];
           watchedState.posts = [...newPosts, ...watchedState.posts];
 
           watchedState.form.processState = 'finished';
-          form.reset();
+          elements.form.reset();
         })
         .catch((error) => {
-          if (error.isAxiosError) {
-            watchedState.form.error = 'network';
-            watchedState.form.processState = 'failed';
-            return error;
-          }
-          if (error.isParsingError) {
-            watchedState.form.error = 'parse';
-            watchedState.form.processState = 'failed';
-            return error;
-          }
-          watchedState.form.error = 'unknown';
+          watchedState.form.error = getErrorType(error);
           watchedState.form.processState = 'failed';
           return error;
         });
     });
-    fetchForNewPosts(watchedState);
+    fetchNewPosts(watchedState);
   });
 };
