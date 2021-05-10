@@ -71,24 +71,12 @@ const renderPosts = (watchedState, i18instance, elements) => {
       a.setAttribute('target', '_blank');
       a.setAttribute('data-id', id);
       a.textContent = title;
-      a.addEventListener('click', (e) => {
-        e.target.classList.remove('font-weight-bold');
-        e.target.classList.add('font-weight-normal');
-        watchedState.uiState.visited.push(id);
-      });
       const button = document.createElement('button');
       button.setAttribute('data-id', id);
       button.setAttribute('data-toggle', 'modal');
       button.setAttribute('data-target', '#modal');
       button.classList.add('btn', 'btn-primary', 'btn-sm');
-      button.textContent = 'Просмотр';
-      button.addEventListener('click', ({ target }) => {
-        watchedState.modal.postID = id;
-        watchedState.uiState.visited.push(id);
-        target.previousElementSibling.classList.remove('font-weight-bold');
-        target.previousElementSibling.classList.add('font-weight-normal');
-        updateModal(watchedState);
-      });
+      button.textContent = i18instance.t('buttons.view');
       newPost.appendChild(a);
       newPost.appendChild(button);
       postsGroup.appendChild(newPost);
@@ -98,7 +86,7 @@ const renderPosts = (watchedState, i18instance, elements) => {
   postsContainer.appendChild(postsGroup);
 };
 
-const formStateHandler = (watchedState, i18instance, elements) => {
+const handleFormStateChange = (watchedState, i18instance, elements) => {
   const { processState } = watchedState.form;
   const { submitButton, urlField, feedback } = elements;
 
@@ -128,7 +116,7 @@ const formStateHandler = (watchedState, i18instance, elements) => {
   }
 };
 
-const rssLoadingStateHandler = (watchedState, elements) => {
+const handleRssLoadingStateChange = (watchedState, elements) => {
   const { processState } = watchedState.rssLoading;
   const { submitButton, urlField, feedback } = elements;
 
@@ -150,16 +138,19 @@ const watcher = (state, i18instance, elements) => {
       case 'form.processState':
       case 'form.error':
       case 'rssLoading.error':
-        formStateHandler(watchedState, i18instance, elements);
+        handleFormStateChange(watchedState, i18instance, elements);
         break;
       case 'rssLoading.processState':
-        rssLoadingStateHandler(watchedState, elements);
+        handleRssLoadingStateChange(watchedState, elements);
         break;
       case 'feeds':
         renderFeeds(watchedState, i18instance, elements);
         break;
       case 'posts':
         renderPosts(watchedState, i18instance, elements);
+        break;
+      case 'uiState.visited':
+        updateModal(watchedState);
         break;
       default:
     }

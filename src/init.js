@@ -18,28 +18,62 @@ const addProxy = (url) => {
   return proxedUrl.toString();
 };
 
+const updateTimeout = 5000;
+
 const fetchNewPosts = (watchedState) => {
-  const updateData = () => {
-    const loadedFeeds = watchedState.feeds
-      .map(_.property('url'))
-      .map(addProxy)
-      .map((proxedUrl) => axios
-        .get(proxedUrl)
-        .then((response) => response.data.contents)
-        .then((data) => parseRSS(data, proxedUrl))
-        .then(([, newPosts]) => {
-          const oldPosts = watchedState.posts;
-          const updated = _.differenceBy(newPosts, oldPosts, 'link');
-          watchedState.posts = [...updated, ...oldPosts];
-        }));
-    Promise.all(loadedFeeds)
-      .then(setTimeout(updateData, 5000));
-  };
-  setTimeout(updateData, 5000);
+  const postPromises = watchedState.feeds
+    .map(_.property('url'))
+    .map(addProxy)
+    .map((proxedUrl) => axios
+      .get(proxedUrl)
+      .then((response) => response.data.contents)
+      .then((data) => parseRSS(data, proxedUrl))
+      .then(([, posts]) => {
+        const oldPosts = watchedState.posts;
+        const newPosts = _.differenceBy(posts, oldPosts, 'link');
+        watchedState.posts = [...newPosts, ...oldPosts];
+      }));
+  Promise.all(postPromises).then(setTimeout(fetchNewPosts, updateTimeout, watchedState));
+};
+
+const getErrorType = (error) => {
+  if (error.isAxiosError) return 'network';
+  if (error.isParsingError) return 'parse';
+  return 'unknown';
 };
 
 export default () => {
+  const state = {
+    form: {
+      processState: 'idle',
+      url: '',
+      error: null,
+    },
+    feeds: [],
+    posts: [],
+    modal: {
+      postID: null,
+    },
+    uiState: {
+      visited: [],
+    },
+    rssLoading: {
+      processState: 'idle',
+      error: null,
+    },
+  };
+
+  const elements = {
+    form: document.querySelector('.rss-form'),
+    urlField: document.querySelector('input[name="url"]'),
+    submitButton: document.querySelector('button[type="submit"]'),
+    feedback: document.querySelector('.feedback'),
+    feedsContainer: document.querySelector('.feeds'),
+    postsContainer: document.querySelector('.posts'),
+  };
+
   const i18instance = i18next.createInstance();
+
   return i18instance.init({
     lng: 'ru',
     resources,
@@ -49,34 +83,6 @@ export default () => {
         url: 'invalid',
       },
     });
-    const state = {
-      form: {
-        processState: 'idle',
-        url: '',
-        error: null,
-      },
-      feeds: [],
-      posts: [],
-      modal: {
-        postID: null,
-      },
-      uiState: {
-        visited: [],
-      },
-      rssLoading: {
-        processState: 'idle',
-        error: null,
-      },
-    };
-
-    const elements = {
-      form: document.querySelector('.rss-form'),
-      urlField: document.querySelector('input[name="url"]'),
-      submitButton: document.querySelector('button[type="submit"]'),
-      feedback: document.querySelector('div.feedback'),
-      feedsContainer: document.querySelector('.feeds'),
-      postsContainer: document.querySelector('.posts'),
-    };
 
     const watchedState = watcher(state, i18instance, elements);
 
@@ -91,11 +97,27 @@ export default () => {
       return schema.validateSync({ url });
     };
 
-    const getErrorType = (error) => {
-      if (error.isAxiosError) return 'network';
-      if (error.isParsingError) return 'parse';
-      return 'unknown';
-    };
+    elements.postsContainer.addEventListener('click', ({ target }) => {
+      const li = target.closest('li');
+      const link = li.querySelector('a');
+      const button = li.querySelector('button');
+      if (target instanceof HTMLAnchorElement || target instanceof HTMLButtonElement) {
+        switch (target) {
+          case link:
+            target.classList.remove('font-weight-bold');
+            target.classList.add('font-weight-normal');
+            watchedState.uiState.visited.push(target.dataset.id);
+            break;
+          case button:
+            watchedState.modal.postID = target.dataset.id;
+            watchedState.uiState.visited.push(target.dataset.id);
+            target.previousElementSibling.classList.remove('font-weight-bold');
+            target.previousElementSibling.classList.add('font-weight-normal');
+            break;
+          default:
+        }
+      }
+    });
 
     elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -116,9 +138,9 @@ export default () => {
         .then((response) => response.data.contents)
         .then((content) => parseRSS(content))
         .then(([feed, newItems]) => {
-          const newFeed = [{ url, ...feed }];
+          const newFeed = { url, ...feed };
           const newPosts = newItems.map((post) => ({ id: _.uniqueId(), ...post }));
-          watchedState.feeds = [...newFeed, ...watchedState.feeds];
+          watchedState.feeds.unshift(newFeed);
           watchedState.posts = [...newPosts, ...watchedState.posts];
 
           watchedState.form.processState = 'finished';
@@ -130,6 +152,6 @@ export default () => {
           return error;
         });
     });
-    fetchNewPosts(watchedState);
+    setTimeout(fetchNewPosts, updateTimeout, watchedState);
   });
 };
