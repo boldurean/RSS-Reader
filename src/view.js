@@ -1,4 +1,5 @@
 import onChange from 'on-change';
+import _ from 'lodash';
 
 const getErrorMessage = (watchedState, i18instance) => {
   if (watchedState.form.error) {
@@ -7,7 +8,7 @@ const getErrorMessage = (watchedState, i18instance) => {
   return i18instance.t(`errors.${watchedState.rssLoading.error}`);
 };
 
-const renderFeeds = (watchedState, i18instance, elements) => {
+const handleFeedsChange = (watchedState, i18instance, elements) => {
   const { feedsContainer } = elements;
 
   if (!watchedState.feeds) return;
@@ -33,7 +34,7 @@ const renderFeeds = (watchedState, i18instance, elements) => {
   feedsContainer.appendChild(feedsGroup);
 };
 
-const updateModal = (watchedState) => {
+const handleModalchange = (watchedState) => {
   const modalTitle = document.querySelector('.modal-title');
   const modalBody = document.querySelector('.modal-body');
   const linkButton = document.querySelector('.full-article');
@@ -44,7 +45,14 @@ const updateModal = (watchedState) => {
   linkButton.setAttribute('href', link);
 };
 
-const renderPosts = (watchedState, i18instance, elements) => {
+const handleVisitedLinkChange = (watchedState) => {
+  const lastVisitedID = _.last(watchedState.uiState.visited);
+  const lastVisitedLink = document.querySelector(`a[data-id="${lastVisitedID}"]`);
+  lastVisitedLink.classList.remove('font-weight-bold');
+  lastVisitedLink.classList.add('font-weight-normal');
+};
+
+const handlePostsChange = (watchedState, i18instance, elements) => {
   const { postsContainer } = elements;
   if (!watchedState.posts) return;
   postsContainer.innerHTML = '';
@@ -132,7 +140,7 @@ const handleRssLoadingStateChange = (watchedState, elements) => {
   }
 };
 
-const watcher = (state, i18instance, elements) => {
+export default (state, i18instance, elements) => {
   const watchedState = onChange(state, (path) => {
     switch (path) {
       case 'form.processState':
@@ -144,18 +152,17 @@ const watcher = (state, i18instance, elements) => {
         handleRssLoadingStateChange(watchedState, elements);
         break;
       case 'feeds':
-        renderFeeds(watchedState, i18instance, elements);
+        handleFeedsChange(watchedState, i18instance, elements);
         break;
       case 'posts':
-        renderPosts(watchedState, i18instance, elements);
+        handlePostsChange(watchedState, i18instance, elements);
         break;
       case 'uiState.visited':
-        updateModal(watchedState);
+        handleModalchange(watchedState);
+        handleVisitedLinkChange(watchedState);
         break;
       default:
     }
   });
   return watchedState;
 };
-
-export default watcher;

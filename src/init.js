@@ -101,21 +101,12 @@ export default () => {
       const li = target.closest('li');
       const link = li.querySelector('a');
       const button = li.querySelector('button');
-      if (target instanceof HTMLAnchorElement || target instanceof HTMLButtonElement) {
-        switch (target) {
-          case link:
-            target.classList.remove('font-weight-bold');
-            target.classList.add('font-weight-normal');
-            watchedState.uiState.visited.push(target.dataset.id);
-            break;
-          case button:
-            watchedState.modal.postID = target.dataset.id;
-            watchedState.uiState.visited.push(target.dataset.id);
-            target.previousElementSibling.classList.remove('font-weight-bold');
-            target.previousElementSibling.classList.add('font-weight-normal');
-            break;
-          default:
-        }
+      if (target === button) {
+        watchedState.modal.postID = target.dataset.id;
+        watchedState.uiState.visited.push(target.dataset.id);
+      }
+      if (target === link) {
+        watchedState.uiState.visited.push(target.dataset.id);
       }
     });
 
