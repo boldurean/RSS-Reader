@@ -2,8 +2,8 @@ export default {
   translation: {
     errors: {
       network: 'Ошибка сети',
-      invalid: 'Ссылка должна быть валидным URL',
-      existing: 'RSS уже существует',
+      urlInvalid: 'Ссылка должна быть валидным URL',
+      urlExisting: 'RSS уже существует',
       parse: 'Ресурс не содержит валидный RSS',
       unknown: 'Неизвестная ошибка, попробуйте еще раз',
     },

@@ -27,10 +27,10 @@ const fetchNewPosts = (watchedState) => {
     .map((proxedUrl) => axios
       .get(proxedUrl)
       .then((response) => response.data.contents)
-      .then((data) => parseRSS(data, proxedUrl))
-      .then(([, posts]) => {
+      .then((data) => parseRSS(data))
+      .then(({ newItems }) => {
         const oldPosts = watchedState.posts;
-        const newPosts = _.differenceBy(posts, oldPosts, 'link');
+        const newPosts = _.differenceBy(newItems, oldPosts, 'link');
         watchedState.posts = [...newPosts, ...oldPosts];
       }));
   Promise.all(postPromises).then(setTimeout(fetchNewPosts, updateTimeout, watchedState));
@@ -80,19 +80,19 @@ export default () => {
   }).then(() => {
     yup.setLocale({
       string: {
-        url: 'invalid',
+        url: 'urlInvalid',
       },
     });
 
     const watchedState = watcher(state, i18instance, elements);
 
     const validateField = (url) => {
-      const loadedUrls = watchedState.feeds.map((feed) => feed.url);
+      const loadedUrls = watchedState.feeds.map((_.property('url')));
       const schema = yup.object().shape({
         url: yup
           .string()
           .url()
-          .notOneOf(loadedUrls, 'existing'),
+          .notOneOf(loadedUrls, 'urlExisting'),
       });
       return schema.validateSync({ url });
     };
@@ -128,11 +128,11 @@ export default () => {
         .get(addProxy(url))
         .then((response) => response.data.contents)
         .then((content) => parseRSS(content))
-        .then(([feed, newItems]) => {
+        .then(({ feed, newItems }) => {
           const newFeed = { url, ...feed };
           const newPosts = newItems.map((post) => ({ id: _.uniqueId(), ...post }));
           watchedState.feeds.unshift(newFeed);
-          watchedState.posts = [...newPosts, ...watchedState.posts];
+          watchedState.posts.unshift(...newPosts);
 
           watchedState.form.processState = 'finished';
           elements.form.reset();

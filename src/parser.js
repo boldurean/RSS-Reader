@@ -29,7 +29,7 @@ export default (data) => {
     error.isParsingError = true;
     throw error;
   }
-  const newFeed = extractFeed(content);
+  const feed = extractFeed(content);
   const newItems = extractItems(content);
-  return [newFeed, newItems];
+  return { feed, newItems };
 };
