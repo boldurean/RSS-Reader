@@ -52,6 +52,8 @@ export default (state, i18instance, elements) => {
     lastVisitedLink.classList.add('font-weight-normal');
   };
 
+  console.log('posts.invalid');
+
   const handlePostsChange = (st) => {
     const { postsContainer } = elements;
     if (!st.posts) return;
