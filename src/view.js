@@ -148,11 +148,9 @@ export default (initState, i18instance, elements) => {
   return onChange(initState, (path) => {
     switch (path) {
       case 'form.processState':
-      case 'form.error':
         handleFormStateChange(initState);
         break;
       case 'rssLoading.processState':
-      case 'rssLoading.error':
         handleRssLoadingStateChange(initState);
         break;
       case 'feeds':
