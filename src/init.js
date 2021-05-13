@@ -134,12 +134,12 @@ export default () => {
           watchedState.feeds.unshift(newFeed);
           watchedState.posts.unshift(...newPosts);
 
-          watchedState.form.processState = 'finished';
+          watchedState.rssLoading.processState = 'finished';
           elements.form.reset();
         })
         .catch((error) => {
-          watchedState.form.error = getErrorType(error);
-          watchedState.form.processState = 'failed';
+          watchedState.rssLoading.error = getErrorType(error);
+          watchedState.rssLoading.processState = 'failed';
           return error;
         });
     });

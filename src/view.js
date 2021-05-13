@@ -8,18 +8,18 @@ const getErrorMessage = (watchedState, i18instance) => {
   return i18instance.t(`errors.${watchedState.rssLoading.error}`);
 };
 
-export default (state, i18instance, elements) => {
-  const handleFeedsChange = (st) => {
+export default (initState, i18instance, elements) => {
+  const handleFeedsChange = (state) => {
     const { feedsContainer } = elements;
 
-    if (!st.feeds) return;
+    if (!state.feeds) return;
     feedsContainer.innerHTML = '';
     const feedsHeader = document.createElement('h2');
     feedsHeader.textContent = i18instance.t('feeds');
     const feedsGroup = document.createElement('ul');
     feedsGroup.classList.add('list-group', 'mb-5');
 
-    const feeds = st.feeds.map(({ title, description }) => {
+    const feeds = state.feeds.map(({ title, description }) => {
       const h3 = document.createElement('h3');
       h3.textContent = title;
       const p = document.createElement('p');
@@ -34,35 +34,33 @@ export default (state, i18instance, elements) => {
     feedsContainer.append(feedsHeader, feedsGroup);
   };
 
-  const handleModalChange = (st) => {
+  const handleModalChange = (state) => {
     const modalTitle = document.querySelector('.modal-title');
     const modalBody = document.querySelector('.modal-body');
     const linkButton = document.querySelector('.full-article');
-    const post = st.posts.find((item) => item.id === st.modal.postID);
+    const post = state.posts.find((item) => item.id === state.modal.postID);
     const { title, description, link } = post;
     modalTitle.textContent = title;
     modalBody.textContent = description;
     linkButton.setAttribute('href', link);
   };
 
-  const handleVisitedLinkChange = (st) => {
-    const lastVisitedID = _.last(st.uiState.visited);
+  const handleVisitedLinkChange = (state) => {
+    const lastVisitedID = _.last(state.uiState.visited);
     const lastVisitedLink = document.querySelector(`a[data-id="${lastVisitedID}"]`);
     lastVisitedLink.classList.remove('font-weight-bold');
     lastVisitedLink.classList.add('font-weight-normal');
   };
 
-  console.log('posts.invalid');
-
-  const handlePostsChange = (st) => {
+  const handlePostsChange = (state) => {
     const { postsContainer } = elements;
-    if (!st.posts) return;
+    if (!state.posts) return;
     postsContainer.innerHTML = '';
     const postsHeader = document.createElement('h2');
     postsHeader.textContent = i18instance.t('posts');
     const postsGroup = document.createElement('ul');
     postsGroup.classList.add('list-group', 'mb-5');
-    const posts = st.posts.map(
+    const posts = state.posts.map(
       ({
         title, link, id,
       }) => {
@@ -74,7 +72,7 @@ export default (state, i18instance, elements) => {
           'align-items-start',
         );
         const a = document.createElement('a');
-        const isVisited = st.uiState.visited.includes(id);
+        const isVisited = state.uiState.visited.includes(id);
         const visitedClass = isVisited ? 'font-weight-normal' : 'font-weight-bold';
         a.classList.add(visitedClass);
         a.setAttribute('href', link);
@@ -95,8 +93,8 @@ export default (state, i18instance, elements) => {
     postsContainer.append(postsHeader, postsGroup);
   };
 
-  const handleFormStateChange = (st) => {
-    const { processState } = st.form;
+  const handleFormStateChange = (state) => {
+    const { processState } = state.form;
     const { submitButton, urlField, feedback } = elements;
 
     switch (processState) {
@@ -104,6 +102,28 @@ export default (state, i18instance, elements) => {
         submitButton.disabled = false;
         urlField.removeAttribute('readonly');
         urlField.classList.remove('is-invalid');
+        feedback.textContent = '';
+        break;
+      case 'failed':
+        submitButton.disabled = false;
+        urlField.removeAttribute('readonly');
+        urlField.classList.add('is-invalid');
+        feedback.classList.add('text-danger');
+        feedback.textContent = getErrorMessage(state, i18instance);
+        break;
+      default:
+        throw new Error(`Unknown state: ${processState}`);
+    }
+  };
+  const handleRssLoadingStateChange = (state) => {
+    const { processState } = state.rssLoading;
+    const { submitButton, urlField, feedback } = elements;
+
+    switch (processState) {
+      case 'sending':
+        submitButton.disabled = true;
+        urlField.setAttribute('readonly', 'readonly');
+        feedback.classList.remove('text-success', 'text-danger', 'is-invalid');
         feedback.textContent = '';
         break;
       case 'finished':
@@ -118,47 +138,32 @@ export default (state, i18instance, elements) => {
         urlField.removeAttribute('readonly');
         urlField.classList.add('is-invalid');
         feedback.classList.add('text-danger');
-        feedback.textContent = getErrorMessage(st, i18instance);
-        break;
-      default:
-        throw new Error(`Unknown state: ${processState}`);
-    }
-  };
-  const handleRssLoadingStateChange = (st) => {
-    const { processState } = st.rssLoading;
-    const { submitButton, urlField, feedback } = elements;
-
-    switch (processState) {
-      case 'sending':
-        submitButton.disabled = true;
-        urlField.setAttribute('readonly', 'readonly');
-        feedback.classList.remove('text-success', 'text-danger', 'is-invalid');
-        feedback.textContent = '';
+        feedback.textContent = getErrorMessage(state, i18instance);
         break;
       default:
         throw new Error(`Unknown process state ${processState}`);
     }
   };
 
-  return onChange(state, (path) => {
+  return onChange(initState, (path) => {
     switch (path) {
       case 'form.processState':
       case 'form.error':
-      case 'rssLoading.error':
-        handleFormStateChange(state);
+        handleFormStateChange(initState);
         break;
       case 'rssLoading.processState':
-        handleRssLoadingStateChange(state);
+      case 'rssLoading.error':
+        handleRssLoadingStateChange(initState);
         break;
       case 'feeds':
-        handleFeedsChange(state);
+        handleFeedsChange(initState);
         break;
       case 'posts':
-        handlePostsChange(state);
+        handlePostsChange(initState);
         break;
       case 'uiState.visited':
-        handleModalChange(state);
-        handleVisitedLinkChange(state);
+        handleModalChange(initState);
+        handleVisitedLinkChange(initState);
         break;
       default:
     }
