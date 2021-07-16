@@ -27,7 +27,7 @@ make build
 
 Paste a **valid RSS** link in the field and pres **Add** 
 
-![main page view](https://i.imgur.com/TIMkPqs.png)
+![main page view](https://i.imgur.com/CTWR10r.png)
 
 The app will load all latest articles if those exist. Description is available in preview by clicking on button beside each article. See example bellow: 
 
