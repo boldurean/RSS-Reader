@@ -31,14 +31,14 @@ beforeEach(async () => {
 
 test('invalid link', async () => {
   expect(
-    screen.queryByText('Ссылка должна быть валидным URL'),
+    screen.queryByText('Must be valid url'),
   ).not.toBeInTheDocument();
   expect(elements.input).not.toHaveClass('is-invalid');
 
   await userEvent.type(elements.input, 'invalid link');
   await userEvent.click(elements.addButton);
   expect(
-    screen.queryByText('Ссылка должна быть валидным URL'),
+    screen.queryByText('Must be valid url'),
   ).toBeInTheDocument();
   expect(elements.input).toHaveClass('is-invalid');
 });
@@ -51,7 +51,7 @@ test('successful RSS', async () => {
     .reply(200, { contents: rss });
   await userEvent.click(elements.addButton);
   await waitFor(() => {
-    expect(document.body).toHaveTextContent('RSS успешно загружен');
+    expect(document.body).toHaveTextContent('Rss has been loaded');
   });
 
   scope.done();
@@ -66,13 +66,13 @@ test('existing RSS', async () => {
 
   await userEvent.click(elements.addButton);
   await waitFor(() => {
-    expect(document.body).toHaveTextContent('RSS успешно загружен');
+    expect(document.body).toHaveTextContent('Rss has been loaded');
   });
   scope.done();
   await userEvent.type(elements.input, rssUrl);
   await userEvent.click(elements.addButton);
   await waitFor(() => {
-    expect(document.body).toHaveTextContent('RSS уже существует');
+    expect(document.body).toHaveTextContent('Rss already exists');
   });
   expect(elements.input).toHaveClass('is-invalid');
 });
@@ -87,7 +87,7 @@ test('link without RSS content', async () => {
 
   await userEvent.click(elements.addButton);
   await waitFor(() => {
-    expect(document.body).toHaveTextContent('Ресурс не содержит валидный RSS');
+    expect(document.body).toHaveTextContent('This source doesn\'t contain valid rss');
   });
   scope.done();
 });
@@ -102,7 +102,7 @@ test('network error', async () => {
 
   await userEvent.click(elements.addButton);
   await waitFor(() => {
-    expect(document.body).toHaveTextContent('Ошибка сети');
+    expect(document.body).toHaveTextContent('Network error');
   });
   scope.done();
 });
@@ -117,7 +117,7 @@ test('modal', async () => {
   userEvent.click(screen.getByRole('button', { name: 'add' }));
 
   const previewBtns = await screen.findAllByRole('button', {
-    name: /Просмотр/i,
+    name: /Preview/i,
   });
   expect(
     screen.getByRole('link', { name: /Миксины \/ HTML: Препроцессор Pug/i }),
