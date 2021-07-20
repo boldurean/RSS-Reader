@@ -20,20 +20,22 @@ const addProxy = (url) => {
 
 const updateTimeout = 5000;
 
-const fetchNewPosts = (watchedState) => {
+const fetchNewPosts = async (watchedState) => {
   const postPromises = watchedState.feeds
     .map(_.property('url'))
     .map(addProxy)
-    .map((proxedUrl) => axios
-      .get(proxedUrl)
-      .then((response) => response.data.contents)
-      .then((data) => parseRSS(data))
-      .then(({ newItems }) => {
-        const oldPosts = watchedState.posts;
-        const newPosts = _.differenceBy(newItems, oldPosts, 'link');
-        watchedState.posts = [...newPosts, ...oldPosts];
-      }));
-  Promise.all(postPromises).then(setTimeout(fetchNewPosts, updateTimeout, watchedState));
+    .map(async (proxedUrl) => {
+      await axios
+        .get(proxedUrl)
+        .then((response) => response.data.contents)
+        .then((data) => parseRSS(data))
+        .then(({ newItems }) => {
+          const oldPosts = watchedState.posts;
+          const newPosts = _.differenceBy(newItems, oldPosts, 'link');
+          watchedState.posts = [...newPosts, ...oldPosts];
+        });
+    });
+  await Promise.all(postPromises).then(setTimeout(fetchNewPosts, updateTimeout, watchedState));
 };
 
 const getErrorType = (error) => {
@@ -42,8 +44,9 @@ const getErrorType = (error) => {
   return 'unknown';
 };
 
-export default () => {
+export default async () => {
   const state = {
+    defaultLanguage: 'en',
     form: {
       processState: 'idle',
       url: '',
@@ -70,11 +73,15 @@ export default () => {
     feedback: document.querySelector('.feedback'),
     feedsContainer: document.querySelector('.feeds'),
     postsContainer: document.querySelector('.posts'),
+    lngButtons: document.querySelectorAll('button[data-lng]'),
+    rssTitle: document.querySelector('.rss-title'),
+    rssSubtitle: document.querySelector('.rss-subtitle'),
+    example: document.querySelector('.example'),
   };
 
   const i18instance = i18next.createInstance();
 
-  return i18instance.init({
+  await i18instance.init({
     lng: 'en',
     resources,
   }).then(() => {
@@ -83,66 +90,72 @@ export default () => {
         url: 'urlInvalid',
       },
     });
-
-    const watchedState = watcher(state, i18instance, elements);
-
-    const validateField = (url) => {
-      const loadedUrls = watchedState.feeds.map((_.property('url')));
-      const schema = yup.object().shape({
-        url: yup
-          .string()
-          .url()
-          .notOneOf(loadedUrls, 'urlExisting'),
-      });
-      return schema.validateSync({ url });
-    };
-
-    elements.postsContainer.addEventListener('click', ({ target }) => {
-      const li = target.closest('li');
-      const link = li.querySelector('a');
-      const button = li.querySelector('button');
-      if (target === button) {
-        watchedState.modal.postID = target.dataset.id;
-        watchedState.uiState.visited.push(target.dataset.id);
-      }
-      if (target === link) {
-        watchedState.uiState.visited.push(target.dataset.id);
-      }
-    });
-
-    elements.form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const data = new FormData(e.target);
-      const url = data.get('url');
-      watchedState.form.url = url;
-      try {
-        validateField(url);
-        watchedState.form.processState = 'idle';
-      } catch (error) {
-        watchedState.form.error = error.message;
-        watchedState.form.processState = 'failed';
-        return error;
-      }
-      watchedState.rssLoading.processState = 'sending';
-      return axios
-        .get(addProxy(url))
-        .then((response) => response.data.contents)
-        .then((content) => parseRSS(content))
-        .then(({ feed, newItems }) => {
-          const newFeed = { url, ...feed };
-          const newPosts = newItems.map((post) => ({ id: _.uniqueId(), ...post }));
-          watchedState.feeds.unshift(newFeed);
-          watchedState.posts.unshift(...newPosts);
-
-          watchedState.rssLoading.processState = 'finished';
-          elements.form.reset();
-        })
-        .catch((error) => {
-          watchedState.rssLoading.error = getErrorType(error);
-          watchedState.rssLoading.processState = 'failed';
-          return error;
-        });
-    });
-    setTimeout(fetchNewPosts, updateTimeout, watchedState);
   });
+
+  const watchedState = watcher(state, i18instance, elements);
+
+  const validateField = (url) => {
+    const loadedUrls = watchedState.feeds.map((_.property('url')));
+    const schema = yup.object().shape({
+      url: yup
+        .string()
+        .url()
+        .notOneOf(loadedUrls, 'urlExisting'),
+    });
+    return schema.validateSync({ url });
+  };
+
+  elements.postsContainer.addEventListener('click', ({ target }) => {
+    const li = target.closest('li');
+    const link = li.querySelector('a');
+    const button = li.querySelector('button');
+    if (target === button) {
+      watchedState.modal.postID = target.dataset.id;
+      watchedState.uiState.visited.push(target.dataset.id);
+    }
+    if (target === link) {
+      watchedState.uiState.visited.push(target.dataset.id);
+    }
+  });
+
+  elements.lngButtons.forEach((button) => {
+    button.addEventListener('click', (e) => {
+      watchedState.defaultLanguage = e.target.dataset.lng;
+    });
+  });
+
+  elements.form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(e.target);
+    const url = data.get('url');
+    watchedState.form.url = url;
+    try {
+      validateField(url);
+      watchedState.form.processState = 'idle';
+    } catch (error) {
+      watchedState.form.error = error.message;
+      watchedState.form.processState = 'failed';
+      return error;
+    }
+    watchedState.rssLoading.processState = 'sending';
+    return axios
+      .get(addProxy(url))
+      .then((response) => response.data.contents)
+      .then((content) => parseRSS(content))
+      .then(({ feed, newItems }) => {
+        const newFeed = { url, ...feed };
+        const newPosts = newItems.map((post) => ({ id: _.uniqueId(), ...post }));
+        watchedState.feeds.unshift(newFeed);
+        watchedState.posts.unshift(...newPosts);
+
+        watchedState.rssLoading.processState = 'finished';
+        elements.form.reset();
+      })
+      .catch((error) => {
+        watchedState.rssLoading.error = getErrorType(error);
+        watchedState.rssLoading.processState = 'failed';
+        return error;
+      });
+  });
+  setTimeout(fetchNewPosts, updateTimeout, watchedState);
 };

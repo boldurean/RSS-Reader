@@ -38,11 +38,14 @@ export default (initState, i18instance, elements) => {
     const modalTitle = document.querySelector('.modal-title');
     const modalBody = document.querySelector('.modal-body');
     const linkButton = document.querySelector('.full-article');
+    const closeButton = document.querySelector('.close-button');
     const post = state.posts.find((item) => item.id === state.modal.postID);
     const { title, description, link } = post;
     modalTitle.textContent = title;
     modalBody.textContent = description;
     linkButton.setAttribute('href', link);
+    linkButton.textContent = i18instance.t('buttons.fullArticle');
+    closeButton.textContent = i18instance.t('buttons.close');
   };
 
   const handleVisitedLinkChange = (state) => {
@@ -145,6 +148,33 @@ export default (initState, i18instance, elements) => {
     }
   };
 
+  const handleLanguageButtonsChange = (state) => {
+    const { defaultLanguage } = state;
+    const { lngButtons, submitButton } = elements;
+    lngButtons.forEach((btn) => {
+      btn.disabled = (defaultLanguage === btn.dataset.lng);
+    });
+    submitButton.textContent = i18instance.t('buttons.add');
+  };
+
+  const handleLanguageChange = async (state) => {
+    const { defaultLanguage } = state;
+    const {
+      rssTitle, rssSubtitle, example, urlField,
+    } = elements;
+    await i18instance.changeLanguage(defaultLanguage).then(() => {
+      rssTitle.textContent = i18instance.t('texts.rssTitle');
+      rssSubtitle.textContent = i18instance.t('texts.rssSubtitle');
+      example.textContent = i18instance.t('texts.example');
+      urlField.placeholder = i18instance.t('urlFieldPlaceholder');
+      handleFormStateChange(state);
+      handleLanguageButtonsChange(state);
+      handleRssLoadingStateChange(state);
+      handleFeedsChange(state);
+      handlePostsChange(state);
+    });
+  };
+
   return onChange(initState, (path) => {
     switch (path) {
       case 'form.processState':
@@ -162,6 +192,9 @@ export default (initState, i18instance, elements) => {
       case 'uiState.visited':
         handleModalChange(initState);
         handleVisitedLinkChange(initState);
+        break;
+      case 'defaultLanguage':
+        handleLanguageChange(initState);
         break;
       default:
     }

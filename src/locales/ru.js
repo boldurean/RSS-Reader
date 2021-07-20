@@ -10,10 +10,19 @@ export default {
     feedback: {
       success: 'RSS успешно загружен',
     },
-    feeds: 'Фиды',
     posts: 'Посты',
+    feeds: 'Фиды',
     buttons: {
       view: 'Просмотр',
+      close: 'Закрыть',
+      fullArticle: 'Вся статья',
+      add: 'Добавить',
+    },
+    urlFieldPlaceholder: 'RSS ссылка',
+    texts: {
+      rssTitle: 'RSS Агрегатор',
+      rssSubtitle: 'Начните читать RSS сегодня! Это легко, это красиво.',
+      example: 'Пример: https://ru.hexlet.io/lessons.rss',
     },
   },
 };
