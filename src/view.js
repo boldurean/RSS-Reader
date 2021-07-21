@@ -150,30 +150,38 @@ export default (initState, i18instance, elements) => {
 
   const handleLanguageButtonsChange = (state) => {
     const { defaultLanguage } = state;
-    const { lngButtons, submitButton } = elements;
+    const { lngButtons } = elements;
     lngButtons.forEach((btn) => {
       btn.disabled = (defaultLanguage === btn.dataset.lng);
     });
-    submitButton.textContent = i18instance.t('buttons.add');
   };
 
   const handleLanguageChange = async (state) => {
     const { defaultLanguage } = state;
     const {
-      rssTitle, rssSubtitle, example, urlField,
+      rssTitle, rssSubtitle, example, urlField, submitButton,
     } = elements;
     await i18instance.changeLanguage(defaultLanguage).then(() => {
       rssTitle.textContent = i18instance.t('texts.rssTitle');
       rssSubtitle.textContent = i18instance.t('texts.rssSubtitle');
       example.textContent = i18instance.t('texts.example');
       urlField.placeholder = i18instance.t('urlFieldPlaceholder');
+      submitButton.textContent = i18instance.t('buttons.add');
+      localStorage.setItem('language', defaultLanguage);
       handleFormStateChange(state);
       handleLanguageButtonsChange(state);
-      handleRssLoadingStateChange(state);
-      handleFeedsChange(state);
-      handlePostsChange(state);
+      try {
+        handleRssLoadingStateChange(state);
+        handleFeedsChange(state);
+        handlePostsChange(state);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('To render Feeds/Posts it must not be empty :)');
+      }
     });
   };
+
+  handleLanguageChange(initState).then(() => handleLanguageButtonsChange(initState));
 
   return onChange(initState, (path) => {
     switch (path) {
