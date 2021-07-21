@@ -45,8 +45,10 @@ const getErrorType = (error) => {
 };
 
 export default async () => {
+  const defaultLanguage = localStorage.getItem('language') ?? 'en';
+
   const state = {
-    defaultLanguage: 'en',
+    defaultLanguage,
     form: {
       processState: 'idle',
       url: '',
@@ -82,7 +84,7 @@ export default async () => {
   const i18instance = i18next.createInstance();
 
   await i18instance.init({
-    lng: 'en',
+    lng: defaultLanguage,
     resources,
   }).then(() => {
     yup.setLocale({
@@ -120,6 +122,7 @@ export default async () => {
 
   elements.lngButtons.forEach((button) => {
     button.addEventListener('click', (e) => {
+      localStorage.removeItem('language');
       watchedState.defaultLanguage = e.target.dataset.lng;
     });
   });
